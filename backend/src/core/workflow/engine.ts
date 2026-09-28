@@ -585,7 +585,7 @@ IMPORTANT INSTRUCTIONS:
           
           if (tool) {
             if (tool.tool_type === 'REST_API' || tool.tool_type === 'WEBHOOK' || !tool.tool_type) {
-                const apiConfig = configCache.getTable('api_connections').find(c => c.tool_id === tool.id);
+                const apiConfig = configCache.getTable('api_connections').find(c => c.tool_id === tool.id) || tool.configuration;
                 if (apiConfig) {
                     try {
                         const credentials = configCache.getTable('tool_credentials').filter(c => c.tool_id === tool.id);
@@ -604,16 +604,17 @@ IMPORTANT INSTRUCTIONS:
                         const { executeIdempotentTool, extractResponse } = await import('../tools/executor.js');
                         
                         const method = apiConfig.method || 'GET';
-                        const url = buildUrl(apiConfig.url, apiConfig.query_params, context);
-                        const headers = buildRequestHeaders(apiConfig.headers, context, apiConfig.auth_type, authCredential);
+                        const rawUrl = apiConfig.url || apiConfig.endpoint; // Handle both schemas
+                        const url = buildUrl(rawUrl, apiConfig.query_params || {}, context);
+                        const headers = buildRequestHeaders(apiConfig.headers || {}, context, apiConfig.auth_type, authCredential);
                         const body = (method !== 'GET' && method !== 'HEAD') 
                                       ? buildRequestBody(apiConfig.body_mapping || call.args, context) 
                                       : undefined;
                                       
                         const result = await executeIdempotentTool(
                             conversationId,
-                            step.workflow_id,
-                            step.id,
+                            step.workflow_id || 'agent',
+                            step.id || 'agent',
                             tool.name,
                             method,
                             url,
