@@ -31,19 +31,34 @@ export async function processIncomingMessage(
   // Handle manual reset command from user
   const cmd = text.trim().toLowerCase();
   if (!isFromMe && (cmd === 'reset' || cmd === 'restart' || cmd === '/reset' || cmd === '/restart')) {
-    logger.info(`Received reset command from ${phone}. Resolving active conversation.`);
+    logger.info(`Received reset command from ${phone}. Refreshing active conversation.`);
     
-    // Close any active conversations for this customer
-    await supabase.from('conversations')
-      .update({ state: 'RESOLVED' })
+    // Find active conversation
+    const { data: activeConv } = await supabase.from('conversations')
+      .select('id')
       .eq('customer_id', customerId)
-      .in('state', ['AI_ACTIVE', 'WAITING_HUMAN', 'HUMAN_ACTIVE', 'WAITING_INPUT']);
+      .in('state', ['AI_ACTIVE', 'WAITING_HUMAN', 'HUMAN_ACTIVE', 'WAITING_INPUT'])
+      .limit(1).maybeSingle();
+
+    if (activeConv) {
+      // Clear workflow state
+      await supabase.from('conversations')
+        .update({ current_workflow_id: null, current_step_id: null, current_intent_id: null, state: 'AI_ACTIVE' })
+        .eq('id', activeConv.id);
+        
+      // Set reset timestamp variable so AI ignores older messages
+      await supabase.from('conversation_variables').upsert({
+        conversation_id: activeConv.id,
+        key: '_reset_timestamp',
+        value: new Date().toISOString()
+      }, { onConflict: 'conversation_id, key' });
+    }
       
     // Send confirmation
     const { sendWhatsAppMessage } = await import('../whatsapp/sender.js');
     await sendWhatsAppMessage(remoteJid, 'আপনার সেশনটি সফলভাবে রিস্টার্ট করা হয়েছে! এখন আপনি নতুনভাবে চ্যাট শুরু করতে পারেন।');
     
-    return; // Exit pipeline, next message starts a new session
+    return; // Exit pipeline, next message starts fresh in same conversation
   }
 
   // 2. Resolve Conversation

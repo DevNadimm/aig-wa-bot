@@ -434,7 +434,18 @@ async function executeAiAgent(step: any, conversationId: string, remoteJid: stri
     .eq('key', '_human_session_summary')
     .maybeSingle();
 
-  const historyData = messagesDataRaw?.reverse() || [];
+  const { data: resetVar } = await supabase
+    .from('conversation_variables')
+    .select('value')
+    .eq('conversation_id', conversationId)
+    .eq('key', '_reset_timestamp')
+    .maybeSingle();
+
+  let historyData = messagesDataRaw?.reverse() || [];
+  
+  if (resetVar?.value) {
+    historyData = historyData.filter((msg: any) => new Date(msg.created_at) > new Date(resetVar.value));
+  }
   
   // Inject human session summary as a system message if it exists
   if (summaryVar?.value) {
@@ -620,7 +631,7 @@ IMPORTANT INSTRUCTIONS:
                             url,
                             headers,
                             body,
-                            apiConfig.timeout_ms || 5000,
+                            apiConfig.timeout_ms || 60000,
                             method !== 'GET' // supportsIdempotency proxy flag
                         );
                         
