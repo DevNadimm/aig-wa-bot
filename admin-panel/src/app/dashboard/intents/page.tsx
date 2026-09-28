@@ -76,9 +76,11 @@ export default async function IntentsPage() {
                       </span>
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button variant="ghost" size="sm">
-                        <PencilEdit02Icon className="h-4 w-4 mr-2" /> Edit
-                      </Button>
+                      <Link href={`/dashboard/intents/${intent.id}`}>
+                        <Button variant="ghost" size="sm">
+                          <PencilEdit02Icon className="h-4 w-4 mr-2" /> Edit
+                        </Button>
+                      </Link>
                     </TableCell>
                   </TableRow>
                 ))}
