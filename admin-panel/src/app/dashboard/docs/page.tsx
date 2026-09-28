@@ -1,5 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { BookOpen01Icon, SourceCodeIcon, BulbIcon, FlashIcon, ArrowRight01Icon, Robot01Icon, CloudServerIcon, Comment01Icon, Target01Icon, Activity01Icon, Wrench01Icon, UserGroup02Icon, Settings02Icon } from "hugeicons-react";
+import { SourceCodeIcon, BulbIcon, FlashIcon, ArrowRight01Icon, BotIcon, CloudServerIcon, Comment01Icon, AiBrain01Icon, GitMergeIcon, ToolsIcon, UserGroupIcon, Database01Icon, Settings02Icon } from "hugeicons-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
@@ -22,7 +22,7 @@ export default function DocsPage() {
             <CardHeader className="border-b border-zinc-800/50 flex flex-row items-center justify-between pb-4">
               <div className="flex items-center gap-3">
                 <div className="p-3 bg-emerald-500/10 rounded-lg">
-                  <Robot01Icon className="h-6 w-6 text-emerald-400" />
+                  <BotIcon className="h-6 w-6 text-emerald-400" />
                 </div>
                 <div>
                   <CardTitle className="text-lg text-zinc-100">AI Agents</CardTitle>
@@ -52,7 +52,7 @@ export default function DocsPage() {
             <CardHeader className="border-b border-zinc-800/50 flex flex-row items-center justify-between pb-4">
               <div className="flex items-center gap-3">
                 <div className="p-3 bg-indigo-500/10 rounded-lg">
-                  <Target01Icon className="h-6 w-6 text-indigo-400" />
+                  <AiBrain01Icon className="h-6 w-6 text-indigo-400" />
                 </div>
                 <div>
                   <CardTitle className="text-lg text-zinc-100">Intents</CardTitle>
@@ -80,7 +80,7 @@ export default function DocsPage() {
             <CardHeader className="border-b border-zinc-800/50 flex flex-row items-center justify-between pb-4">
               <div className="flex items-center gap-3">
                 <div className="p-3 bg-purple-500/10 rounded-lg">
-                  <Activity01Icon className="h-6 w-6 text-purple-400" />
+                  <GitMergeIcon className="h-6 w-6 text-purple-400" />
                 </div>
                 <div>
                   <CardTitle className="text-lg text-zinc-100">Workflows</CardTitle>
@@ -110,7 +110,7 @@ export default function DocsPage() {
             <CardHeader className="border-b border-zinc-800/50 flex flex-row items-center justify-between pb-4">
               <div className="flex items-center gap-3">
                 <div className="p-3 bg-orange-500/10 rounded-lg">
-                  <Wrench01Icon className="h-6 w-6 text-orange-400" />
+                  <ToolsIcon className="h-6 w-6 text-orange-400" />
                 </div>
                 <div>
                   <CardTitle className="text-lg text-zinc-100">Tools & External APIs</CardTitle>
@@ -138,7 +138,7 @@ export default function DocsPage() {
             <CardHeader className="border-b border-zinc-800/50 flex flex-row items-center justify-between pb-4">
               <div className="flex items-center gap-3">
                 <div className="p-3 bg-blue-500/10 rounded-lg">
-                  <BookOpen01Icon className="h-6 w-6 text-blue-400" />
+                  <Database01Icon className="h-6 w-6 text-blue-400" />
                 </div>
                 <div>
                   <CardTitle className="text-lg text-zinc-100">Knowledge Base (RAG)</CardTitle>
@@ -166,7 +166,7 @@ export default function DocsPage() {
             <CardHeader className="border-b border-zinc-800/50 flex flex-row items-center justify-between pb-4">
               <div className="flex items-center gap-3">
                 <div className="p-3 bg-pink-500/10 rounded-lg">
-                  <UserGroup02Icon className="h-6 w-6 text-pink-400" />
+                  <UserGroupIcon className="h-6 w-6 text-pink-400" />
                 </div>
                 <div>
                   <CardTitle className="text-lg text-zinc-100">Human Teams & Handoff</CardTitle>
@@ -200,22 +200,22 @@ export default function DocsPage() {
             <CardContent className="p-0">
               <div className="flex flex-col divide-y divide-zinc-800/50">
                 <a href="#ai-agents" className="flex items-center gap-3 p-4 hover:bg-zinc-900/50 transition-colors text-sm text-zinc-400 hover:text-zinc-100">
-                  <Robot01Icon className="h-4 w-4" /> AI Agents
+                  <BotIcon className="h-4 w-4" /> AI Agents
                 </a>
                 <a href="#intents" className="flex items-center gap-3 p-4 hover:bg-zinc-900/50 transition-colors text-sm text-zinc-400 hover:text-zinc-100">
-                  <Target01Icon className="h-4 w-4" /> Intents
+                  <AiBrain01Icon className="h-4 w-4" /> Intents
                 </a>
                 <a href="#workflows" className="flex items-center gap-3 p-4 hover:bg-zinc-900/50 transition-colors text-sm text-zinc-400 hover:text-zinc-100">
-                  <Activity01Icon className="h-4 w-4" /> Workflows
+                  <GitMergeIcon className="h-4 w-4" /> Workflows
                 </a>
                 <a href="#tools" className="flex items-center gap-3 p-4 hover:bg-zinc-900/50 transition-colors text-sm text-zinc-400 hover:text-zinc-100">
-                  <Wrench01Icon className="h-4 w-4" /> Tools & API
+                  <ToolsIcon className="h-4 w-4" /> Tools & API
                 </a>
                 <a href="#knowledge" className="flex items-center gap-3 p-4 hover:bg-zinc-900/50 transition-colors text-sm text-zinc-400 hover:text-zinc-100">
-                  <BookOpen01Icon className="h-4 w-4" /> Knowledge Base
+                  <Database01Icon className="h-4 w-4" /> Knowledge Base
                 </a>
                 <a href="#human-agents" className="flex items-center gap-3 p-4 hover:bg-zinc-900/50 transition-colors text-sm text-zinc-400 hover:text-zinc-100">
-                  <UserGroup02Icon className="h-4 w-4" /> Human Teams
+                  <UserGroupIcon className="h-4 w-4" /> Human Teams
                 </a>
               </div>
             </CardContent>

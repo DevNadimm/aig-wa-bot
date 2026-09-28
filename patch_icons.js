@@ -1,17 +1,23 @@
 
 const fs = require('fs');
-const files = [
-  'admin-panel/src/app/dashboard/agents/page.tsx',
-  'admin-panel/src/app/dashboard/intents/page.tsx',
-  'admin-panel/src/app/dashboard/knowledge/page.tsx',
-  'admin-panel/src/app/dashboard/workflows/page.tsx',
-  'admin-panel/src/app/dashboard/tools/page.tsx'
-];
+let code = fs.readFileSync('admin-panel/src/app/dashboard/docs/page.tsx', 'utf8');
 
-for (const file of files) {
-  let content = fs.readFileSync(file, 'utf8');
-  content = content.replace(/Edit01Icon/g, 'PencilEdit02Icon');
-  fs.writeFileSync(file, content);
-  console.log('Patched ' + file);
+// Replace imports if needed
+const importsToAdd = ['BotIcon', 'AiBrain01Icon', 'GitMergeIcon', 'ToolsIcon', 'Database01Icon', 'UserGroupIcon'];
+for (const icon of importsToAdd) {
+  if (!code.includes(icon)) {
+    code = code.replace('import { BookOpen01Icon, SourceCodeIcon', \import { \, BookOpen01Icon, SourceCodeIcon\);
+  }
 }
+
+// Map the old icons to new ones
+code = code.replace(/Robot01Icon/g, 'BotIcon');
+code = code.replace(/Target01Icon/g, 'AiBrain01Icon');
+code = code.replace(/Activity01Icon/g, 'GitMergeIcon');
+code = code.replace(/Wrench01Icon/g, 'ToolsIcon');
+code = code.replace(/BookOpen01Icon/g, 'Database01Icon');
+code = code.replace(/UserGroup02Icon/g, 'UserGroupIcon');
+
+fs.writeFileSync('admin-panel/src/app/dashboard/docs/page.tsx', code);
+console.log('Fixed docs icons to match sidebar');
 
