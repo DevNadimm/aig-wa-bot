@@ -148,12 +148,12 @@ function normaliseModelName(modelName: string, provider: LLMProvider): string {
 
   // For OpenAI-compatible providers, map common Gemini names → provider equivalents
   const GROQ_MODELS: Record<string, string> = {
-    "gemini-3.8-flash": "llama-3.3-70b-versatile",
-    "gemini-3.5-flash": "llama-3.1-70b-versatile",
-    "gemini-3.5-flash-lite": "llama-3.1-8b-instant",
-    "gemini-3.1-pro-preview": "llama-3.3-70b-versatile",
-    "gemini-2.5-flash": "llama-3.3-70b-versatile",
-    "gemini-2.5-pro": "llama-3.3-70b-versatile",
+    "gemini-3.8-flash": "openai/gpt-oss-20b",
+    "gemini-3.5-flash": "openai/gpt-oss-20b",
+    "gemini-3.5-flash-lite": "allam-2-7b",
+    "gemini-3.1-pro-preview": "openai/gpt-oss-120b",
+    "gemini-2.5-flash": "openai/gpt-oss-20b",
+    "gemini-2.5-pro": "openai/gpt-oss-120b",
   };
 
   const OPENROUTER_MODELS: Record<string, string> = {
@@ -165,7 +165,7 @@ function normaliseModelName(modelName: string, provider: LLMProvider): string {
     "gemini-2.5-pro": "meta-llama/llama-3.3-70b-instruct:free",
   };
 
-  if (provider === "groq") return GROQ_MODELS[modelName] ?? "llama-3.3-70b-versatile";
+  if (provider === "groq") return GROQ_MODELS[modelName] ?? "openai/gpt-oss-20b";
   if (provider === "openrouter")
     return OPENROUTER_MODELS[modelName] ?? "meta-llama/llama-3.3-70b-instruct:free";
 
