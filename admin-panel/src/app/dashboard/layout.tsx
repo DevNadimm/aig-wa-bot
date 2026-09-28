@@ -1,5 +1,5 @@
-import Link from"next/link";
-import { Comment01Icon, DashboardCircleIcon, GitMergeIcon, Settings01Icon, AiBrain01Icon, Database01Icon, Link01Icon, Logout01Icon, BotIcon } from "hugeicons-react";
+import Link from "next/link";
+import { Comment01Icon, DashboardCircleIcon, GitMergeIcon, Settings01Icon, AiBrain01Icon, Database01Icon, Link01Icon, Logout01Icon, BotIcon, UserGroupIcon } from "hugeicons-react";
 
 import { Button } from "@/components/ui/button";
 import { signOut } from"./actions";
@@ -10,7 +10,7 @@ import { Breadcrumb } from"./Breadcrumb";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data } = await supabase.auth.getUser(); const user = data?.user;
   
   if (!user) return null;
 
@@ -27,7 +27,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
     const { data: agentData } = await supabase
       .from('human_agents')
       .select('id, name')
-      .eq('id', user.id)
+      .eq('auth_user_id', user.id)
       .single();
     agent = agentData;
   }
@@ -36,13 +36,14 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const displayName = admin?.name || agent?.name || user.email;
 
   const allNavItems = [
-    { name:"Overview", href:"/dashboard", icon: DashboardCircleIcon, roles: ['admin', 'agent'] },
+    { name:"Overview", href:"/dashboard", icon: DashboardCircleIcon, roles: ['admin'] },
     { name:"Conversations", href:"/dashboard/conversations", icon: Comment01Icon, roles: ['admin', 'agent'] },
     { name:"Knowledge Base", href:"/dashboard/knowledge", icon: Database01Icon, roles: ['admin'] },
     { name:"Intents", href:"/dashboard/intents", icon: AiBrain01Icon, roles: ['admin'] },
     { name:"Workflows", href:"/dashboard/workflows", icon: GitMergeIcon, roles: ['admin'] },
     { name:"Tools & APIs", href:"/dashboard/tools", icon: Link01Icon, roles: ['admin'] },
     { name:"AI Agents", href:"/dashboard/agents", icon: BotIcon, roles: ['admin'] },
+    { name:"Team & Agents", href:"/dashboard/human-agents", icon: UserGroupIcon, roles: ['admin'] },
     { name:"Settings", href:"/dashboard/settings", icon: Settings01Icon, roles: ['admin'] },
   ];
 

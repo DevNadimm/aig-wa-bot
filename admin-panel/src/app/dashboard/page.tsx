@@ -8,9 +8,20 @@ import { Button } from"@/components/ui/button";
 import { Suspense } from"react";
 import { SystemStatusWidget } from"./SystemStatusWidget";
 
+import { redirect } from "next/navigation";
+
 export default async function DashboardOverview() {
   const supabase = await createClient();
-  
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/auth/login");
+
+  // Check if admin
+  const { data: admin } = await supabase.from('admins').select('id').eq('id', user.id).single();
+  if (!admin) {
+    // Not an admin, probably an agent. Redirect to conversations.
+    redirect("/dashboard/conversations");
+  }
+
   // Fetch high-level metrics
   const { count: convCount } = await supabase
     .from('conversations')
@@ -132,7 +143,7 @@ export default async function DashboardOverview() {
               </TableHeader>
               <TableBody>
                 {recentConversations?.map((conv) => {
-                  const customerName = conv.customers?.name || 'Unknown Customer';
+                  const customerData = (Array.isArray(conv.customers) ? conv.customers[0] : conv.customers) as any; const customerName = customerData?.name || 'Unknown Customer';
                   const initial = customerName.charAt(0).toUpperCase();
                   return (
                     <TableRow key={conv.id} className="border-zinc-800/50 hover:bg-zinc-900/50">
@@ -143,7 +154,7 @@ export default async function DashboardOverview() {
                           </div>
                           <div className="flex flex-col">
                             <span className="font-medium text-zinc-200">{customerName}</span>
-                            <span className="text-xs text-zinc-500">{conv.customers?.phone}</span>
+                            <span className="text-xs text-zinc-500">{customerData?.phone}</span>
                           </div>
                         </div>
                       </TableCell>

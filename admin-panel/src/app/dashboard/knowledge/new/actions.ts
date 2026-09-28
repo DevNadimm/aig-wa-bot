@@ -7,7 +7,7 @@ import { redirect } from"next/navigation"
 export async function createKnowledge(formData: FormData) {
   const supabase = await createClient()
 
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data } = await supabase.auth.getUser(); const user = data?.user
   if (!user) throw new Error("Unauthorized")
 
   const { data: orgs } = await supabase.from('organizations').select('id').limit(1)

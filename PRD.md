@@ -2430,3 +2430,29 @@ It is:
 > **A configuration-driven WhatsApp AI Agent Platform where the Admin Panel controls AI behavior, knowledge, intents, workflows, tools, APIs, human agents, handoff rules, messages, models, and business rules without requiring normal code changes.**
 
 AIG Hospital PACB will simply be the **first configured tenant/use case** of this platform.
+
+---
+
+# 85. Cost Optimization & Token Management Strategies
+
+To handle a large scale of users (e.g., 900+ concurrent active users) while maintaining a near-zero or extremely low API cost, the system must implement the following token and resource optimization techniques:
+
+### 1. Chat History Truncation
+* **Problem:** Sending the entire conversation history (e.g., 10-20 messages) consumes massive input tokens.
+* **Solution:** Only include the last 3-4 message pairs (user + bot) in the LLM context. Older context should be truncated or summarized to keep the payload lightweight.
+
+### 2. Caching (Semantic / Exact Match)
+* **Problem:** Repeatedly calling the LLM for frequently asked, static questions (e.g., "What is the address?", "Doctor schedule").
+* **Solution:** Implement a caching layer (Redis or DB). If a user asks a highly frequent question, the system should serve the response from the cache without hitting the Gemini API.
+
+### 3. Smart Knowledge Retrieval (Optimized RAG)
+* **Problem:** Injecting full documents into the prompt for Knowledge Base queries wastes tokens.
+* **Solution:** Utilize `pgvector` in Supabase for semantic search. Only retrieve and inject the **top 1 or 2 most relevant chunks** into the prompt, strictly limiting the context size.
+
+### 4. Rule-Based Logic (Pre-AI Processing)
+* **Problem:** Using AI to process simple greetings ("Hi", "Thanks", "Ok").
+* **Solution:** Intercept common greetings and short, exact-match phrases at the WhatsApp Gateway layer. Respond using static system messages (e.g., from the `system_messages` table) before routing to the AI agent.
+
+### 5. Strict Model Routing Strategy
+* **Problem:** Using a heavy/expensive model for simple routing or conversational tasks.
+* **Solution:** Default all Router Agents and general Worker Agents to **Gemini 1.5 Flash** (highly cost-effective). Restrict the use of **Gemini 1.5 Pro** only to highly complex, specialized tasks explicitly configured via the Admin Panel.

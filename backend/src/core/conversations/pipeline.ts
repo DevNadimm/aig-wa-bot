@@ -66,7 +66,14 @@ export async function processIncomingMessage(
   // If a human is actively handling this or the customer is waiting for a human,
   // we DO NOT trigger the AI. We only save the message for the human to see.
   if (conv.state === 'HUMAN_ACTIVE' || conv.state === 'WAITING_HUMAN') {
-    logger.info(`Conversation ${conversationId} is in ${conv.state} state. Skipping AI execution.`);
+    logger.info({ event: 'human_mode_ai_blocked', conversationId, state: conv.state });
+    // Phase 6: Record event for assigned agent notification
+    try {
+      const { storeCustomerMessageInHumanMode } = await import('../handoff/human-message.service.js');
+      await storeCustomerMessageInHumanMode(conversationId, conv.assigned_agent_id ?? null);
+    } catch (eventErr) {
+      logger.error({ err: eventErr }, 'Failed to record customer message event in human mode');
+    }
     return;
   }
 
@@ -80,6 +87,53 @@ export async function processIncomingMessage(
   conversationLocks.add(conversationId);
 
   try {
+    // Phase 6: Check for explicit customer human request BEFORE AI processing
+    try {
+      const { detectCustomerHumanRequest, evaluateHandoffDecision } = await import('../handoff/handoff-decision.service.js');
+      if (detectCustomerHumanRequest(text)) {
+        logger.info({ event: 'customer_requested_human', conversationId });
+        const { sendWhatsAppMessage } = await import('../whatsapp/sender.js');
+        const handoffResult = await evaluateHandoffDecision(
+          { requires_human: true, reason: 'CUSTOMER_REQUESTED_HUMAN' as const },
+          conversationId,
+          organizationId,
+        );
+        if (handoffResult.approved) {
+          if (handoffResult.agent) {
+            // Agent assigned — ownership service already transitioned state
+            const systemMessages = configCache.getTable('system_messages');
+            const msg = systemMessages.find(m => m.message_key === 'handoff_assigned');
+            await sendWhatsAppMessage(remoteJid, msg?.content || 'You have been connected to a support agent.', conversationId, 'SYSTEM');
+          } else {
+            // No agent available — queue
+            const { assignConversation } = await import('../handoff/ownership.service.js');
+            // Transition to WAITING_HUMAN
+            const { data: waitUpdate } = await supabase
+              .from('conversations')
+              .update({
+                state: 'WAITING_HUMAN',
+                handoff_reason: 'CUSTOMER_REQUESTED_HUMAN',
+                updated_at: new Date().toISOString(),
+              })
+              .eq('id', conversationId)
+              .in('state', ['AI_ACTIVE', 'WAITING_INPUT'])
+              .select('id')
+              .maybeSingle();
+            if (waitUpdate) {
+              const systemMessages = configCache.getTable('system_messages');
+              const msg = systemMessages.find(m => m.message_key === 'handoff_waiting');
+              await sendWhatsAppMessage(remoteJid, handoffResult.queuedMessage || msg?.content || 'Please wait, we are connecting you to an agent.', conversationId, 'SYSTEM');
+            }
+          }
+          return; // Exit pipeline — handoff handled
+        }
+        // If handoff not approved (shouldn't happen for customer request), continue to AI
+      }
+    } catch (handoffErr) {
+      logger.error({ err: handoffErr }, 'Error in customer human request detection');
+      // Continue to normal AI processing if handoff detection fails
+    }
+
     // 2.5 Check if we need to resume a workflow
     if (conv.state === 'WAITING_INPUT' && conv.current_workflow_id && conv.current_step_id) {
       logger.info(`Resuming workflow ${conv.current_workflow_id} at step ${conv.current_step_id}`);
@@ -150,9 +204,9 @@ async function executeFallback(remoteJid: string, conversationId: string) {
   const systemMessages = configCache.getTable('system_messages');
   const fallbackObj = systemMessages.find(m => m.message_key === 'Fallback');
   
-  const fallbackMessage = fallbackObj?.content || "দুঃখিত, আমি আপনার কথা বুঝতে পারিনি। আমরা মূলত ডাক্তারের অ্যাপয়েন্টমেন্ট বুকিং সংক্রান্ত সহায়তা প্রদান করে থাকি। এর বাইরের কোনো বিষয়ের উত্তর আমরা দিতে পারবো না। অনুগ্রহ করে নির্দিষ্ট কোনো প্রশ্ন থাকলে জানান।";
+  const fallbackMsg = fallbackObj?.content || "দুঃখিত, আমি আপনার কথাটি বুঝতে পারিনি। আমরা শুধুমাত্র ডাক্তারের অ্যাপয়েন্টমেন্ট, চিকিৎসা খরচ, এবং মেডিকেল ভিসা সংক্রান্ত সহায়তা প্রদান করে থাকি। এর বাইরের কোনো প্রশ্নের উত্তর আমরা দিতে পারবো না।";
   
-  await sendWhatsAppMessage(remoteJid, fallbackMessage, conversationId);
+  await sendWhatsAppMessage(remoteJid, fallbackMsg, conversationId);
 }
 
 async function resolveCustomer(phone: string, organizationId: string, pushName?: string, lid?: string): Promise<string | null> {
@@ -201,11 +255,11 @@ async function resolveCustomer(phone: string, organizationId: string, pushName?:
   return newCustomer.id;
 }
 
-async function resolveConversation(customerId: string): Promise<{ id: string, state: string, current_workflow_id?: string, current_step_id?: string, current_intent_id?: string } | null> {
+async function resolveConversation(customerId: string): Promise<{ id: string, state: string, current_workflow_id?: string, current_step_id?: string, current_intent_id?: string, assigned_agent_id?: string } | null> {
   // Find active conversation
   const { data: active } = await supabase
     .from('conversations')
-    .select('id, state, current_workflow_id, current_step_id, current_intent_id')
+    .select('id, state, current_workflow_id, current_step_id, current_intent_id, assigned_agent_id')
     .eq('customer_id', customerId)
     .in('state', ['AI_ACTIVE', 'WAITING_HUMAN', 'HUMAN_ACTIVE', 'WAITING_INPUT'])
     .order('created_at', { ascending: false })
@@ -217,7 +271,8 @@ async function resolveConversation(customerId: string): Promise<{ id: string, st
     state: active.state,
     current_workflow_id: active.current_workflow_id,
     current_step_id: active.current_step_id,
-    current_intent_id: active.current_intent_id
+    current_intent_id: active.current_intent_id,
+    assigned_agent_id: active.assigned_agent_id,
   };
 
   // Create new conversation

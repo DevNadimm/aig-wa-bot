@@ -8,7 +8,7 @@ export async function createWorkflow(formData: FormData) {
   const supabase = await createClient()
 
   // First get the org id from the user
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data: authData } = await supabase.auth.getUser(); const user = authData?.user
   if (!user) throw new Error("Unauthorized")
 
   // For MVP, get the first organization

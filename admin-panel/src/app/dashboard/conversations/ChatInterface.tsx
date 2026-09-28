@@ -1,20 +1,24 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from"react";
-import { Button } from"@/components/ui/button";
+import { useState, useRef, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 import { SentIcon, UserCircleIcon, BotIcon, Tick01Icon, TickDouble01Icon, Clock01Icon, Loading02Icon, Shield01Icon, FlashIcon, AlertCircleIcon } from "hugeicons-react";
-import { sendMessage, changeConversationState } from"./actions";
+import { sendMessage, changeConversationState, assignConversationToAgent } from "./actions";
 import { createClient } from"@/lib/supabase/client";
 
 const MSG_PAGE_SIZE = 30;
 
-export function ChatInterface({ conversation, messages: initialMessages, currentUserId, hasMoreMessages: initialHasMore }: { conversation: any, messages: any[], currentUserId: string, hasMoreMessages: boolean }) {
+export function ChatInterface({ conversation, messages: initialMessages, currentUserId, currentUserAgentId, isAdmin, availableAgents, hasMoreMessages: initialHasMore }: { conversation: any, messages: any[], currentUserId: string, currentUserAgentId: string, isAdmin: boolean, availableAgents?: any[], hasMoreMessages: boolean }) {
   const [inputText, setInputText] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [messages, setMessages] = useState(initialMessages);
+  const [localState, setLocalState] = useState(conversation.state);
+  const [localAssignedAgentId, setLocalAssignedAgentId] = useState(conversation.assigned_agent_id);
   const [hasMore, setHasMore] = useState(initialHasMore);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [isScrolling, setIsScrolling] = useState(false);
+  const router = useRouter();
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -27,8 +31,10 @@ export function ChatInterface({ conversation, messages: initialMessages, current
   useEffect(() => {
     setMessages(initialMessages);
     setHasMore(initialHasMore);
+    setLocalState(conversation.state);
+    setLocalAssignedAgentId(conversation.assigned_agent_id);
     isInitialLoad.current = true;
-  }, [initialMessages, initialHasMore]);
+  }, [initialMessages, initialHasMore, conversation.state, conversation.assigned_agent_id]);
 
   // Auto-scroll to bottom on initial load and new messages
   useEffect(() => {
@@ -126,12 +132,12 @@ export function ChatInterface({ conversation, messages: initialMessages, current
     return () => observer.disconnect();
   }, [hasMore, isLoadingMore, loadOlderMessages]);
 
-  // Real-time subscription for new messages
+  // Realtime subscription
   useEffect(() => {
     const supabase = createClient();
     
     const channel = supabase
-      .channel(`messages:${conversation.id}`)
+      .channel(`chat:${conversation.id}`)
       .on(
         'postgres_changes',
         {
@@ -155,6 +161,20 @@ export function ChatInterface({ conversation, messages: initialMessages, current
           }
         }
       )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'conversations',
+          filter: `id=eq.${conversation.id}`,
+        },
+        (payload) => {
+          const updatedConv = payload.new;
+          setLocalState(updatedConv.state);
+          setLocalAssignedAgentId(updatedConv.assigned_agent_id);
+        }
+      )
       .subscribe();
 
     return () => {
@@ -172,9 +192,17 @@ export function ChatInterface({ conversation, messages: initialMessages, current
       setInputText("");
       inputRef.current?.focus();
       
-      if (conversation.state === 'WAITING_HUMAN') {
+      let stateChanged = false;
+      if (localState === 'WAITING_HUMAN') {
+        setLocalState('HUMAN_ACTIVE');
+        if (!isAdmin) setLocalAssignedAgentId(currentUserAgentId);
         await changeConversationState(conversation.id, 'HUMAN_ACTIVE');
+        stateChanged = true;
       }
+      
+      // Refresh the page so the Inbox list updates its timestamp/state
+      router.refresh();
+      
     } catch (error) {
       console.error(error);
     } finally {
@@ -184,9 +212,35 @@ export function ChatInterface({ conversation, messages: initialMessages, current
 
   const handleStateChange = async (newState: 'HUMAN_ACTIVE' | 'AI_ACTIVE') => {
     try {
+      setLocalState(newState); // Optimistic update
+      if (newState === 'AI_ACTIVE') setLocalAssignedAgentId(null);
+      else if (newState === 'HUMAN_ACTIVE' && !isAdmin) setLocalAssignedAgentId(currentUserAgentId);
+      
       await changeConversationState(conversation.id, newState);
+      router.refresh();
     } catch (error) {
       console.error(error);
+      setLocalState(conversation.state); // Revert on failure
+      setLocalAssignedAgentId(conversation.assigned_agent_id);
+    }
+  };
+
+  const handleAssignAdmin = async (agentId: string) => {
+    try {
+      if (agentId === "") {
+        setLocalState('AI_ACTIVE');
+        setLocalAssignedAgentId(null);
+        await assignConversationToAgent(conversation.id, null);
+      } else {
+        setLocalState('HUMAN_ACTIVE');
+        setLocalAssignedAgentId(agentId);
+        await assignConversationToAgent(conversation.id, agentId);
+      }
+      router.refresh();
+    } catch (error) {
+      console.error(error);
+      setLocalState(conversation.state);
+      setLocalAssignedAgentId(conversation.assigned_agent_id);
     }
   };
 
@@ -207,48 +261,88 @@ export function ChatInterface({ conversation, messages: initialMessages, current
 
   let lastDateLabel ="";
 
+  const isAssignedAgent = isAdmin || 
+    (localState === 'HUMAN_ACTIVE' && conversation.state !== 'HUMAN_ACTIVE') || 
+    (localAssignedAgentId === currentUserAgentId);
+
   return (
-    <div className="flex flex-col h-full bg-transparent relative">
+    <div className="flex-1 flex flex-col h-full bg-[#0a0a0c] relative">
       {/* Header */}
-      <div className="flex items-center justify-between px-5 py-3.5 border-b border-zinc-800/50 bg-[#09090b]">
+      <div className="h-16 shrink-0 flex items-center justify-between px-6 border-b border-zinc-800/60 bg-[#09090b]">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-full bg-gradient-to-br from-indigo-500/20 to-indigo-600/10 flex items-center justify-center ring-1 ring-indigo-500/20">
-            <span className="text-sm font-bold text-indigo-400">{customerInitials}</span>
+          <div className="h-9 w-9 rounded-full bg-zinc-800 flex items-center justify-center font-bold text-sm text-zinc-300">
+            {customerInitials}
           </div>
           <div>
-            <h2 className="text-sm font-semibold text-zinc-100">{conversation.customers?.name || 'Unknown Customer'}</h2>
-            <p className="text-[11px] text-zinc-500 font-mono">{conversation.customers?.phone || 'No Phone'}</p>
+            <h3 className="font-semibold text-zinc-100">{conversation.customers?.name || conversation.customers?.phone ||"Unknown Customer"}</h3>
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <div className={`w-1.5 h-1.5 rounded-full ${
+                localState === 'WAITING_HUMAN' ? 'bg-orange-400' :
+                localState === 'HUMAN_ACTIVE' ? 'bg-indigo-400' : 'bg-emerald-400'
+              }`} />
+              <span className="text-[10px] text-zinc-500 font-mono tracking-tight uppercase">
+                {localState.replace('_', ' ')}
+              </span>
+            </div>
           </div>
         </div>
         
         <div className="flex items-center gap-2">
           <div className={`inline-flex items-center justify-center font-medium gap-1.5 h-8 px-3 rounded-md text-xs shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_1px_2px_rgba(0,0,0,0.4)] border ${
-            conversation.state === 'HUMAN_ACTIVE' 
+            localState === 'HUMAN_ACTIVE' 
               ? 'bg-indigo-600 text-white border-indigo-700' 
-              : conversation.state === 'WAITING_HUMAN' 
+              : localState === 'WAITING_HUMAN' 
               ? 'bg-orange-600 text-white border-orange-700' 
               : 'bg-emerald-600 text-white border-emerald-700'
           }`}>
-            {conversation.state === 'HUMAN_ACTIVE' && <Shield01Icon className="w-3.5 h-3.5" />}
-            {conversation.state === 'AI_ACTIVE' && <FlashIcon className="w-3.5 h-3.5" />}
-            {conversation.state === 'WAITING_HUMAN' && <AlertCircleIcon className="w-3.5 h-3.5" />}
-            {conversation.state.replace('_', ' ')}
+            {localState === 'HUMAN_ACTIVE' && <Shield01Icon className="w-3.5 h-3.5" />}
+            {localState === 'AI_ACTIVE' && <FlashIcon className="w-3.5 h-3.5" />}
+            {localState === 'WAITING_HUMAN' && <AlertCircleIcon className="w-3.5 h-3.5" />}
+            {localState.replace('_', ' ')}
           </div>
-
-          {conversation.state !== 'HUMAN_ACTIVE' ? (
-            <Button 
-              onClick={() => handleStateChange('HUMAN_ACTIVE')}
-              size="sm"
-            >
-              <Shield01Icon className="w-3.5 h-3.5" /> Take Over
-            </Button>
-          ) : (
+          {isAdmin && (
+            <div className="relative">
+              <select 
+                className="appearance-none h-8 bg-[#121214] hover:bg-zinc-800/50 border border-zinc-800/80 text-xs text-zinc-300 rounded-md pl-3 pr-8 font-medium focus:outline-none focus:ring-1 focus:ring-indigo-500/50 transition-colors shadow-sm cursor-pointer"
+                value={localState === 'AI_ACTIVE' ? "" : (localAssignedAgentId || "")}
+                onChange={(e) => handleAssignAdmin(e.target.value)}
+              >
+                <option value="" className="bg-zinc-900 text-zinc-100">AI (Unassigned)</option>
+                {availableAgents?.map(agent => (
+                  <option key={agent.id} value={agent.id} className="bg-zinc-900 text-zinc-100">{agent.name}</option>
+                ))}
+              </select>
+              <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-400">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M6 9l6 6 6-6"/>
+                </svg>
+              </div>
+            </div>
+          )}
+          {localState !== 'HUMAN_ACTIVE' ? (
+            isAdmin ? (
+              <Button 
+                onClick={() => handleStateChange('HUMAN_ACTIVE')}
+                size="sm"
+              >
+                <Shield01Icon className="w-3.5 h-3.5" /> Take Over
+              </Button>
+            ) : (
+              <Button disabled variant="secondary" size="sm">
+                <Shield01Icon className="w-3.5 h-3.5" /> Waiting for assignment
+              </Button>
+            )
+          ) : isAssignedAgent ? (
             <Button 
               onClick={() => handleStateChange('AI_ACTIVE')}
               variant="secondary"
               size="sm"
             >
               <BotIcon className="w-3.5 h-3.5 text-emerald-400" /> Release to AI
+            </Button>
+          ) : (
+            <Button disabled variant="secondary" size="sm">
+              <UserCircleIcon className="w-3.5 h-3.5" /> Assigned to another agent
             </Button>
           )}
         </div>
@@ -388,17 +482,17 @@ export function ChatInterface({ conversation, messages: initialMessages, current
       {/* Input Area */}
       <div className="px-4 py-3 bg-[#09090b] border-t border-zinc-800/50">
         <form onSubmit={handleSend} className="flex items-center gap-2">
-          <input 
-            ref={inputRef}
-            disabled={conversation.state === 'AI_ACTIVE'}
-            value={inputText}
-            onChange={(e) => setInputText(e.target.value)}
-            placeholder={conversation.state === 'AI_ACTIVE' ?"Take over to reply..." :"Type a message..."} 
-            className="flex-1 h-10 px-4 bg-[#121214] border border-zinc-800 rounded-full text-sm text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-indigo-500/50 focus:border-indigo-500/50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed" 
-          />
-          <button 
-            type="submit" 
-            disabled={!inputText.trim() || isSending || conversation.state === 'AI_ACTIVE'}
+            <input 
+              ref={inputRef}
+              disabled={localState === 'AI_ACTIVE' || (localState === 'HUMAN_ACTIVE' && !isAssignedAgent) || (localState === 'WAITING_HUMAN' && !isAdmin)}
+              value={inputText}
+              onChange={(e) => setInputText(e.target.value)}
+              placeholder={localState === 'AI_ACTIVE' ? "Take over to reply..." : (localState === 'WAITING_HUMAN' && !isAdmin) ? "Waiting for admin assignment..." : (localState === 'HUMAN_ACTIVE' && !isAssignedAgent) ? "Assigned to another agent" : "Type a message..."} 
+              className="flex-1 h-10 px-4 bg-[#121214] border border-zinc-800 rounded-full text-sm text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-indigo-500/50 focus:border-indigo-500/50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed" 
+            />
+            <button 
+              type="submit" 
+              disabled={!inputText.trim() || isSending || localState === 'AI_ACTIVE' || (localState === 'HUMAN_ACTIVE' && !isAssignedAgent) || (localState === 'WAITING_HUMAN' && !isAdmin)}
             className="h-10 w-10 shrink-0 rounded-full  shadow-indigo-900/30 disabled:bg-zinc-800 disabled:text-zinc-600 disabled:shadow-none flex items-center justify-center transition-all active:scale-95"
           >
             {isSending ? <Loading02Icon className="w-4 h-4 animate-spin" /> : <SentIcon className="w-4 h-4 ml-0.5" />}
@@ -407,7 +501,7 @@ export function ChatInterface({ conversation, messages: initialMessages, current
       </div>
       
       {/* Overlay if AI is Active */}
-      {conversation.state === 'AI_ACTIVE' && (
+      {localState === 'AI_ACTIVE' && (
         <div 
           className="absolute bottom-20 left-1/2 -translate-x-1/2 transition-opacity duration-300 ease-in-out"
           style={{ opacity: isScrolling ? 0.15 : 1 }}

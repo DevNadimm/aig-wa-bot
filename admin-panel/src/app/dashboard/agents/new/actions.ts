@@ -7,7 +7,7 @@ import { redirect } from"next/navigation"
 export async function createAgent(formData: FormData) {
   const supabase = await createClient()
 
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data: authData } = await supabase.auth.getUser(); const user = authData?.user
   if (!user) throw new Error("Unauthorized")
 
   const { data: orgs } = await supabase.from('organizations').select('id').limit(1)

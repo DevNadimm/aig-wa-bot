@@ -166,6 +166,13 @@ export function buildGeminiTools(dbTools: any[]) {
 
   const functionDeclarations = dbTools.map(tool => {
     let parameters = tool.parameters;
+    if (typeof parameters === 'string') {
+        try {
+            parameters = JSON.parse(parameters);
+        } catch (e) {
+            parameters = {};
+        }
+    }
     if (parameters && !parameters.type) {
         parameters = {
             type: "object",

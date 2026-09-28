@@ -128,10 +128,25 @@ export async function executeWorkflow(
         await updateConversationStateAtomic(conversationId, { 
           state: 'WAITING_HUMAN',
           timeout_at: null,
-          timeout_action: null 
+          timeout_action: null,
+          handoff_reason: 'WORKFLOW_REQUIRES_HUMAN',
         });
+        // Phase 6: Record handoff event
+        try {
+          const { auditService } = await import('../handoff/audit.service.js');
+          await auditService.recordHandoffEvent({
+            conversationId,
+            eventType: 'AI_HANDOFF_REQUESTED',
+            actorType: 'AI',
+            previousState: 'AI_ACTIVE',
+            newState: 'WAITING_HUMAN',
+            reason: 'WORKFLOW_REQUIRES_HUMAN',
+          });
+        } catch (eventErr) {
+          logger.error({ err: eventErr }, 'Failed to record handoff event');
+        }
         // We successfully transitioned state, now send message
-        await sendWhatsAppMessage(remoteJid, result.reason || "I am transferring you to a human agent. Please wait.", conversationId);
+        await sendWhatsAppMessage(remoteJid, result.reason || "I am transferring you to a human agent. Please wait.", conversationId, 'SYSTEM');
         
         return;
       } 
@@ -380,6 +395,31 @@ async function executeAiAgent(step: any, conversationId: string, remoteJid: stri
     }
   }
 
+  // Phase 6: Add request_human_handoff function declaration
+  // This allows AI to request handoff when it genuinely cannot complete a task
+  functionDeclarations.push({
+    name: 'request_human_handoff',
+    description: 'Request human agent support ONLY when you genuinely cannot complete the customer task using your available tools, knowledge, and capabilities. Do NOT call this for tasks you can handle.',
+    parameters: {
+      type: Type.OBJECT,
+      properties: {
+        reason: {
+          type: Type.STRING,
+          description: 'Structured reason: AI_CANNOT_COMPLETE, REQUIRED_CAPABILITY_MISSING, REQUIRED_TOOL_UNAVAILABLE, SAFETY_REQUIRES_HUMAN',
+        },
+        required_team: {
+          type: Type.STRING,
+          description: 'Team capability needed (e.g. Appointment, Visa, Billing). Optional.',
+        },
+        summary: {
+          type: Type.STRING,
+          description: 'Brief summary of what the customer needs, for the human agent.',
+        },
+      },
+      required: ['reason', 'summary'],
+    },
+  });
+
   const { data: messagesDataRaw } = await supabase
     .from('conversation_messages')
     .select('*')
@@ -387,9 +427,28 @@ async function executeAiAgent(step: any, conversationId: string, remoteJid: stri
     .order('created_at', { ascending: false })
     .limit(10);
 
+  // Phase 6: Also fetch human session summary if available
+  const { data: summaryVar } = await supabase
+    .from('conversation_variables')
+    .select('value')
+    .eq('conversation_id', conversationId)
+    .eq('key', '_human_session_summary')
+    .maybeSingle();
+
+  const historyData = messagesDataRaw?.reverse() || [];
+  
+  // Inject human session summary as a system message if it exists
+  if (summaryVar?.value) {
+    historyData.unshift({
+      sender_type: 'SYSTEM',
+      content: typeof summaryVar.value === 'string' ? summaryVar.value : JSON.stringify(summaryVar.value),
+      created_at: new Date(0).toISOString(), // Put at beginning
+    });
+  }
+
   let contents = await contextBuilder.build({
     conversationId,
-    historyData: messagesDataRaw?.reverse() || []
+    historyData,
   });
 
   const modelConfig = await modelResolver.resolve('WORKER', agentId);
@@ -460,7 +519,7 @@ IMPORTANT INSTRUCTIONS:
   let maxLoops = 5;
   let loops = 0;
 
-  const geminiTools = functionDeclarations.length > 0 ? [{ functionDeclarations }] : [];
+  const geminiTools = functionDeclarations.length > 0 ? functionDeclarations : [];
 
   while (!isDone && loops < maxLoops) {
     loops++;
@@ -478,6 +537,50 @@ IMPORTANT INSTRUCTIONS:
       const toolResults = [];
       
       for (const call of response.functionCalls) {
+          // Phase 6: Handle request_human_handoff specially
+          if (call.name === 'request_human_handoff') {
+            const args = call.args as any;
+            logger.info({
+              event: 'ai_handoff_requested',
+              conversationId,
+              reason: args?.reason,
+              required_team: args?.required_team,
+            });
+            try {
+              const { evaluateHandoffDecision } = await import('../handoff/handoff-decision.service.js');
+              const handoffResult = await evaluateHandoffDecision(
+                {
+                  requires_human: true,
+                  reason: args?.reason || 'AI_CANNOT_COMPLETE',
+                  required_team: args?.required_team,
+                  summary: args?.summary,
+                },
+                conversationId,
+                convData?.customer_id ? (await supabase.from('customers').select('organization_id').eq('id', convData.customer_id).single()).data?.organization_id || '' : '',
+              );
+              if (handoffResult.approved) {
+                // Transition to handoff
+                await updateConversationStateAtomic(conversationId, {
+                  state: 'WAITING_HUMAN',
+                  handoff_reason: args?.reason || 'AI_CANNOT_COMPLETE',
+                  timeout_at: null,
+                  timeout_action: null,
+                });
+                const systemMessages = configCache.getTable('system_messages');
+                const msg = systemMessages.find((m: { message_key: string }) => m.message_key === 'handoff_waiting');
+                await sendWhatsAppMessage(remoteJid, msg?.content || 'I am connecting you with a human agent. Please wait.', conversationId, 'SYSTEM');
+                return { type: 'HANDOFF' as const, reason: args?.summary };
+              }
+              // If not approved, continue AI processing
+              toolResults.push({ functionResponse: { name: call.name, response: { status: 'rejected', message: 'Handoff not required. Please continue helping the customer.' } } });
+              continue;
+            } catch (handoffErr) {
+              logger.error({ err: handoffErr }, 'Handoff decision evaluation failed');
+              toolResults.push({ functionResponse: { name: call.name, response: { error: 'Handoff evaluation failed' } } });
+              continue;
+            }
+          }
+
           const tool = activeTools?.find(t => t.name === call.name);
           let apiData: any = null;
           

@@ -18,7 +18,12 @@ class ConfigCache {
     "tool_permissions",
     "api_connections",
     "tool_credentials",
-    "business_rules"
+    "business_rules",
+    "human_agents",
+    "agent_teams",
+    "human_agent_teams",
+    "handoff_rules",
+    "system_messages"
   ];
 
   async init() {

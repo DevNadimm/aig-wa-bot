@@ -7,9 +7,10 @@ import { createClient } from"@/lib/supabase/client";
 
 const INBOX_PAGE_SIZE = 20;
 
-export function InboxList({ initialConversations, selectedId, hasMoreConversations }: { 
+export function InboxList({ initialConversations, selectedId, currentUserAgentId, hasMoreConversations }: { 
   initialConversations: any[], 
   selectedId: string | null,
+  currentUserAgentId: string,
   hasMoreConversations: boolean 
 }) {
   const [conversations, setConversations] = useState(initialConversations);
@@ -25,6 +26,31 @@ export function InboxList({ initialConversations, selectedId, hasMoreConversatio
     setConversations(initialConversations);
     setHasMore(hasMoreConversations);
   }, [initialConversations, hasMoreConversations]);
+
+  // Listen to realtime updates on conversations
+  useEffect(() => {
+    const supabase = createClient();
+    const channel = supabase.channel('inbox-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'conversations'
+        },
+        (payload) => {
+          const updatedConv = payload.new;
+          setConversations((prev) => 
+            prev.map(c => c.id === updatedConv.id ? { ...c, state: updatedConv.state, last_message_at: updatedConv.last_message_at, assigned_agent_id: updatedConv.assigned_agent_id } : c)
+          );
+        }
+      )
+      .subscribe();
+      
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
 
   // Load more conversations
   const loadMore = useCallback(async () => {
@@ -125,7 +151,7 @@ export function InboxList({ initialConversations, selectedId, hasMoreConversatio
           <Search01Icon className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500" />
           <input 
             type="text"
-            placeholder="Search01Icon by name..."
+            placeholder="Search by name..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full h-8 pl-8 pr-3 text-xs bg-[#121214] border border-zinc-800 rounded-lg text-zinc-300 placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-indigo-500/50 focus:border-indigo-500/50 transition-colors"
@@ -176,7 +202,7 @@ export function InboxList({ initialConversations, selectedId, hasMoreConversatio
                         </span>
                       </div>
                       
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex items-center gap-1.5 mt-1">
                         <span className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider ${
                           conv.state === 'WAITING_HUMAN' 
                             ? 'bg-orange-500/15 text-orange-400 ring-1 ring-inset ring-orange-500/20' 
@@ -187,6 +213,11 @@ export function InboxList({ initialConversations, selectedId, hasMoreConversatio
                           {conv.state === 'WAITING_HUMAN' && <AlertCircleIcon className="w-2.5 h-2.5 mr-0.5 inline" />}
                           {conv.state.replace('_', ' ')}
                         </span>
+                        {conv.assigned_agent_id === currentUserAgentId && currentUserAgentId !== '' && (
+                          <span className="inline-flex items-center rounded-md px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider bg-blue-500/20 text-blue-400 ring-1 ring-inset ring-blue-500/30">
+                            My Task
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>

@@ -10,9 +10,25 @@ export default async function ConversationsPage({
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data } = await supabase.auth.getUser(); const user = data?.user;
   const resolvedParams = await searchParams;
   const selectedId = resolvedParams.id as string | undefined;
+
+  let currentUserAgentId = null;
+  let isAdmin = false;
+  let availableAgents: any[] = [];
+  
+  if (user) {
+    const { data: admin } = await supabase.from('admins').select('id').eq('id', user.id).single();
+    if (admin) {
+      isAdmin = true;
+      const { data: agents } = await supabase.from('human_agents').select('id, name').eq('status', 'ACTIVE');
+      availableAgents = agents || [];
+    } else {
+      const { data: agent } = await supabase.from('human_agents').select('id').eq('auth_user_id', user.id).single();
+      if (agent) currentUserAgentId = agent.id;
+    }
+  }
 
   const INBOX_PAGE_SIZE = 20;
 
@@ -28,6 +44,7 @@ export default async function ConversationsPage({
       state,
       priority,
       last_message_at,
+      assigned_agent_id,
       customers (id, name, phone)
     `)
     .order("last_message_at", { ascending: false })
@@ -90,17 +107,21 @@ export default async function ConversationsPage({
         <InboxList 
           initialConversations={conversations || []} 
           selectedId={selectedId || selectedConversation?.id || null}
+          currentUserAgentId={currentUserAgentId || ''}
           hasMoreConversations={hasMoreConversations}
         />
       }
       chat={
         selectedConversation ? (
-          <ChatInterface 
-            conversation={selectedConversation} 
-            messages={messages} 
-            currentUserId={user?.id || ''} 
-            hasMoreMessages={hasMoreMessages}
-          />
+              <ChatInterface 
+                conversation={selectedConversation} 
+                messages={messages} 
+                currentUserId={user?.id || ''} 
+                currentUserAgentId={currentUserAgentId || ''}
+                isAdmin={isAdmin}
+                availableAgents={availableAgents}
+                hasMoreMessages={hasMoreMessages}
+              />
         ) : (
           <div className="h-full flex flex-col items-center justify-center">
             <Comment01Icon className="w-12 h-12 text-zinc-700 mb-4" />

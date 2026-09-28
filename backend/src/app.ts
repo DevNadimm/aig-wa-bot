@@ -41,8 +41,27 @@ export function createApp(): Express {
     }
   });
 
+  // Phase 6: Handoff routes
+  app.use(async (req, res, next) => {
+    if (req.path.startsWith('/api/handoff')) {
+      const { default: handoffRoutes } = await import('./core/handoff/handoff.routes.js');
+      handoffRoutes(req, res, next);
+    } else {
+      next();
+    }
+  });
+
   app.post('/api/whatsapp/send', async (req: Request, res: Response) => {
     try {
+      // Secure the send endpoint
+      const { authMiddleware } = await import('./middleware/auth.middleware.js');
+      await new Promise<void>((resolve, reject) => {
+        authMiddleware(req, res, (err?: any) => {
+          if (err) reject(err);
+          else resolve();
+        });
+      });
+
       const { phone, lid, text, conversationId, senderType } = req.body;
       const { sendWhatsAppMessage } = await import('./core/whatsapp/sender.js');
       
@@ -56,8 +75,10 @@ export function createApp(): Express {
       }
       await sendWhatsAppMessage(remoteJid, text, conversationId, senderType || 'AI');
       res.json({ success: true });
-    } catch (error) {
-      res.status(500).json({ error: 'Failed to send' });
+    } catch (error: any) {
+      if (!res.headersSent) {
+        res.status(error.statusCode || 500).json({ error: error.message || 'Failed to send' });
+      }
     }
   });
 

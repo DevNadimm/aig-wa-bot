@@ -5,7 +5,7 @@ import { revalidatePath } from"next/cache";
 
 export async function createTool(data: any) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: authData } = await supabase.auth.getUser(); const user = authData?.user;
   if (!user) throw new Error("Unauthorized");
 
   // Get organization

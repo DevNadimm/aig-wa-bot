@@ -64,7 +64,9 @@ export class PromptResolver {
     } else if (type === 'ROUTER') {
       const routerPrompt = prompts.find(p => p.type === 'ROUTER');
       if (routerPrompt && routerPrompt.content) {
-        promptContent = routerPrompt.content;
+        const intents = configCache.getTable('intents').filter(i => i.status === 'ACTIVE');
+        const intentDescriptions = intents.map(i => `- ${i.slug}: ${i.description || i.name}`).join('\n');
+        promptContent = routerPrompt.content + '\n\nAvailable Intents:\n' + intentDescriptions + '\n- fallback: Use this if the message does not match any of the above intents clearly.';
       } else {
         // Dynamic construction based on active intents from cache
         const intents = configCache.getTable('intents').filter(i => i.status === 'ACTIVE');
@@ -121,8 +123,14 @@ export class ContextBuilder {
     if (params.historyData && params.historyData.length > 0) {
       // Ensure chronological order. Usually it's passed descending from DB, so reverse it if needed.
       // Assuming params.historyData is already chronologically sorted (oldest first)
+
+      // Phase 6: Inject human session summary if available (for AI resumption after human handoff)
+      const summaryEntry = params.historyData.find(
+        (msg) => msg.sender_type === 'SYSTEM' && msg.content?.startsWith('=== Human Agent Session Summary ===')
+      );
+
       params.historyData.forEach((msg) => {
-        const role = (msg.sender_type === 'CUSTOMER' || msg.sender_type === 'SYSTEM') ? 'user' : 'model';
+        const role = (msg.sender_type === 'CUSTOMER' || msg.sender_type === 'SYSTEM') ? 'user' : 'model'; // AI, HUMAN, HUMAN_AGENT → model
         
         if (contents.length > 0 && contents[contents.length - 1].role === role) {
           contents[contents.length - 1].parts.push({ text: msg.content });

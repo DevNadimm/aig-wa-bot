@@ -7,7 +7,6 @@ import Link from"next/link";
 import { ArrowLeft01Icon } from "hugeicons-react";
 import { createClient } from"@/lib/supabase/server";
 import { createAgent } from"./actions";
-import { SubmitButton } from"./SubmitButton"; // Let's make a reusable submit button or just use standard
 
 export default async function NewAgentPage() {
   const supabase = await createClient();
