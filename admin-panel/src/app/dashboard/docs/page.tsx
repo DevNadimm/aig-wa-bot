@@ -21,8 +21,8 @@ export default function DocsPage() {
           <Card id="ai-agents" className="border-zinc-800 bg-[#0c0c0e]">
             <CardHeader className="border-b border-zinc-800/50 flex flex-row items-center justify-between pb-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-emerald-500/10 rounded-lg">
-                  <Robot01Icon className="h-5 w-5 text-emerald-400" />
+                <div className="p-3 bg-emerald-500/10 rounded-lg">
+                  <Robot01Icon className="h-6 w-6 text-emerald-400" />
                 </div>
                 <div>
                   <CardTitle className="text-lg text-zinc-100">AI Agents</CardTitle>
@@ -51,8 +51,8 @@ export default function DocsPage() {
           <Card id="intents" className="border-zinc-800 bg-[#0c0c0e]">
             <CardHeader className="border-b border-zinc-800/50 flex flex-row items-center justify-between pb-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-indigo-500/10 rounded-lg">
-                  <Target01Icon className="h-5 w-5 text-indigo-400" />
+                <div className="p-3 bg-indigo-500/10 rounded-lg">
+                  <Target01Icon className="h-6 w-6 text-indigo-400" />
                 </div>
                 <div>
                   <CardTitle className="text-lg text-zinc-100">Intents</CardTitle>
@@ -79,8 +79,8 @@ export default function DocsPage() {
           <Card id="workflows" className="border-zinc-800 bg-[#0c0c0e]">
             <CardHeader className="border-b border-zinc-800/50 flex flex-row items-center justify-between pb-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-purple-500/10 rounded-lg">
-                  <Activity01Icon className="h-5 w-5 text-purple-400" />
+                <div className="p-3 bg-purple-500/10 rounded-lg">
+                  <Activity01Icon className="h-6 w-6 text-purple-400" />
                 </div>
                 <div>
                   <CardTitle className="text-lg text-zinc-100">Workflows</CardTitle>
@@ -109,8 +109,8 @@ export default function DocsPage() {
           <Card id="tools" className="border-zinc-800 bg-[#0c0c0e]">
             <CardHeader className="border-b border-zinc-800/50 flex flex-row items-center justify-between pb-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-orange-500/10 rounded-lg">
-                  <Wrench01Icon className="h-5 w-5 text-orange-400" />
+                <div className="p-3 bg-orange-500/10 rounded-lg">
+                  <Wrench01Icon className="h-6 w-6 text-orange-400" />
                 </div>
                 <div>
                   <CardTitle className="text-lg text-zinc-100">Tools & External APIs</CardTitle>
@@ -137,8 +137,8 @@ export default function DocsPage() {
           <Card id="knowledge" className="border-zinc-800 bg-[#0c0c0e]">
             <CardHeader className="border-b border-zinc-800/50 flex flex-row items-center justify-between pb-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-500/10 rounded-lg">
-                  <BookOpen01Icon className="h-5 w-5 text-blue-400" />
+                <div className="p-3 bg-blue-500/10 rounded-lg">
+                  <BookOpen01Icon className="h-6 w-6 text-blue-400" />
                 </div>
                 <div>
                   <CardTitle className="text-lg text-zinc-100">Knowledge Base (RAG)</CardTitle>
@@ -165,8 +165,8 @@ export default function DocsPage() {
           <Card id="human-agents" className="border-zinc-800 bg-[#0c0c0e]">
             <CardHeader className="border-b border-zinc-800/50 flex flex-row items-center justify-between pb-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-pink-500/10 rounded-lg">
-                  <UserGroup02Icon className="h-5 w-5 text-pink-400" />
+                <div className="p-3 bg-pink-500/10 rounded-lg">
+                  <UserGroup02Icon className="h-6 w-6 text-pink-400" />
                 </div>
                 <div>
                   <CardTitle className="text-lg text-zinc-100">Human Teams & Handoff</CardTitle>
