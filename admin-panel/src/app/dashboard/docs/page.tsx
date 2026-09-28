@@ -1,5 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { BookOpen01Icon, SourceCodeIcon, BulbIcon, FlashIcon, ArrowRight01Icon, Robot01Icon, CloudServerIcon, Comment01Icon, Target01Icon, WorkflowIcon, Wrench01Icon, UserGroup02Icon, ArrowUpRight01Icon } from "hugeicons-react";
+import { BookOpen01Icon, SourceCodeIcon, BulbIcon, FlashIcon, ArrowRight01Icon, Robot01Icon, CloudServerIcon, Comment01Icon, Target01Icon, Activity01Icon, Wrench01Icon, UserGroup02Icon, ArrowUpRight01Icon } from "hugeicons-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
@@ -80,7 +80,7 @@ export default function DocsPage() {
             <CardHeader className="border-b border-zinc-800/50 flex flex-row items-center justify-between pb-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-purple-500/10 rounded-lg">
-                  <WorkflowIcon className="h-5 w-5 text-purple-400" />
+                  <Activity01Icon className="h-5 w-5 text-purple-400" />
                 </div>
                 <div>
                   <CardTitle className="text-lg text-zinc-100">Workflows</CardTitle>
@@ -206,7 +206,7 @@ export default function DocsPage() {
                   <Target01Icon className="h-4 w-4" /> Intents
                 </a>
                 <a href="#workflows" className="flex items-center gap-3 p-4 hover:bg-zinc-900/50 transition-colors text-sm text-zinc-400 hover:text-zinc-100">
-                  <WorkflowIcon className="h-4 w-4" /> Workflows
+                  <Activity01Icon className="h-4 w-4" /> Workflows
                 </a>
                 <a href="#tools" className="flex items-center gap-3 p-4 hover:bg-zinc-900/50 transition-colors text-sm text-zinc-400 hover:text-zinc-100">
                   <Wrench01Icon className="h-4 w-4" /> Tools & API
