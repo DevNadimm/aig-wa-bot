@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, use } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,17 +11,18 @@ import { ArrowLeft01Icon } from "hugeicons-react";
 import { updateIntent } from "./actions";
 import { createClient } from "@/lib/supabase/client";
 
-export default function EditIntentPage({ params }: { params: { id: string } }) {
+export default function EditIntentPage({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = use(params);
   const [intent, setIntent] = useState<any>(null);
   
   useEffect(() => {
     async function load() {
       const supabase = createClient();
-      const { data } = await supabase.from('intents').select('*').eq('id', params.id).single();
+      const { data } = await supabase.from('intents').select('*').eq('id', resolvedParams.id).single();
       setIntent(data);
     }
     load();
-  }, [params.id]);
+  }, [resolvedParams.id]);
 
   if (!intent) return <div className="text-zinc-400 p-8">Loading...</div>;
 
@@ -39,7 +40,7 @@ export default function EditIntentPage({ params }: { params: { id: string } }) {
         </div>
       </div>
 
-      <form action={updateIntent.bind(null, params.id)}>
+      <form action={updateIntent.bind(null, resolvedParams.id)}>
         <Card className="border-zinc-800 bg-[#0c0c0e]">
           <CardHeader className="border-b border-zinc-800/50 pb-6">
             <CardTitle className="text-lg text-zinc-100">Intent Details</CardTitle>
