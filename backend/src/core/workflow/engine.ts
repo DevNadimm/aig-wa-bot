@@ -518,7 +518,7 @@ IMPORTANT INSTRUCTIONS:
   let maxLoops = 5;
   let loops = 0;
 
-  const geminiTools = functionDeclarations.length > 0 ? functionDeclarations : [];
+  const geminiTools = functionDeclarations.length > 0 ? [{ functionDeclarations }] : [];
 
   while (!isDone && loops < maxLoops) {
     loops++;
