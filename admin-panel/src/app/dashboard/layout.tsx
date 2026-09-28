@@ -38,11 +38,11 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const allNavItems = [
     { name:"Overview", href:"/dashboard", icon: DashboardCircleIcon, roles: ['admin'] },
     { name:"Conversations", href:"/dashboard/conversations", icon: Comment01Icon, roles: ['admin', 'agent'] },
-    { name:"Knowledge Base", href:"/dashboard/knowledge", icon: Database01Icon, roles: ['admin'] },
+    { name:"AI Agents", href:"/dashboard/agents", icon: BotIcon, roles: ['admin'] },
     { name:"Intents", href:"/dashboard/intents", icon: AiBrain01Icon, roles: ['admin'] },
     { name:"Workflows", href:"/dashboard/workflows", icon: GitMergeIcon, roles: ['admin'] },
     { name:"Tools & APIs", href:"/dashboard/tools", icon: ToolsIcon, roles: ['admin'] },
-    { name:"AI Agents", href:"/dashboard/agents", icon: BotIcon, roles: ['admin'] },
+    { name:"Knowledge Base", href:"/dashboard/knowledge", icon: Database01Icon, roles: ['admin'] },
     { name:"Team & Agents", href:"/dashboard/human-agents", icon: UserGroupIcon, roles: ['admin'] },
     { name:"Settings", href:"/dashboard/settings", icon: Settings01Icon, roles: ['admin'] },
   ];
