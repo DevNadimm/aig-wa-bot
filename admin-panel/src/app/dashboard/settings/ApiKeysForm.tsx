@@ -72,7 +72,11 @@ export function ApiKeysForm({ bot }: { bot: any }) {
 
   const handleProviderChange = (id: ProviderId) => {
     setSelectedProvider(id);
-    setKeys([""]);
+    if (id === getInitialProvider()) {
+      setKeys(getInitialKeys());
+    } else {
+      setKeys([""]);
+    }
     setShowKey({});
     setMessage({ type: "", text: "" });
   };
