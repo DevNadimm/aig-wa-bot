@@ -182,7 +182,22 @@ export async function processIncomingMessage(
     }
 
     // 3. Intent Routing
-    const intentResult = await detectIntent(text, organizationId);
+    // Fetch recent history for context
+    const { data: historyData } = await supabase
+      .from('conversation_messages')
+      .select('sender_type, content')
+      .eq('conversation_id', conversationId)
+      .order('created_at', { ascending: false })
+      .limit(6);
+      
+    let recentHistoryStr = '';
+    if (historyData && historyData.length > 0) {
+      // Exclude the current message which was just inserted
+      const pastMessages = historyData.filter(msg => msg.content !== text).reverse();
+      recentHistoryStr = pastMessages.map((msg: any) => `${msg.sender_type === 'CUSTOMER' ? 'User' : 'AI'}: ${msg.content}`).join('\n');
+    }
+
+    const intentResult = await detectIntent(text, organizationId, recentHistoryStr);
     logger.info(`Detected Intent: ${intentResult?.intent}`);
 
     // 4. Fetch the Workflow ID and Agent ID for this intent

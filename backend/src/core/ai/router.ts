@@ -7,7 +7,7 @@ interface IntentDetectionResult {
   confidence: number;
 }
 
-export async function detectIntent(userMessage: string, organizationId: string): Promise<IntentDetectionResult | null> {
+export async function detectIntent(userMessage: string, organizationId: string, recentHistory: string = ''): Promise<IntentDetectionResult | null> {
   logger.info(`Detecting intent for message: "${userMessage}"`);
 
   try {
@@ -16,7 +16,8 @@ export async function detectIntent(userMessage: string, organizationId: string):
 
     // 2. Build the router prompt
     const prompt = await promptResolver.resolve('ROUTER');
-    const finalPrompt = `${prompt}\n\nUser Message: "${userMessage}"`;
+    const historyText = recentHistory ? `\n\nRecent Chat History for Context:\n${recentHistory}` : '';
+    const finalPrompt = `${prompt}${historyText}\n\nUser Message: "${userMessage}"`;
 
     // 3. Define the expected JSON Schema (provider-agnostic)
     const schema = {
