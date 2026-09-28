@@ -28,6 +28,24 @@ export async function processIncomingMessage(
     return;
   }
 
+  // Handle manual reset command from user
+  const cmd = text.trim().toLowerCase();
+  if (!isFromMe && (cmd === 'reset' || cmd === 'restart' || cmd === '/reset' || cmd === '/restart')) {
+    logger.info(`Received reset command from ${phone}. Resolving active conversation.`);
+    
+    // Close any active conversations for this customer
+    await supabase.from('conversations')
+      .update({ state: 'RESOLVED' })
+      .eq('customer_id', customerId)
+      .in('state', ['AI_ACTIVE', 'WAITING_HUMAN', 'HUMAN_ACTIVE', 'WAITING_INPUT']);
+      
+    // Send confirmation
+    const { sendWhatsAppMessage } = await import('../whatsapp/sender.js');
+    await sendWhatsAppMessage(remoteJid, 'আপনার সেশনটি সফলভাবে রিস্টার্ট করা হয়েছে! এখন আপনি নতুনভাবে চ্যাট শুরু করতে পারেন।');
+    
+    return; // Exit pipeline, next message starts a new session
+  }
+
   // 2. Resolve Conversation
   let conv = await resolveConversation(customerId);
 
