@@ -1,6 +1,5 @@
-import { generateStructuredContent } from './gemini.js';
+import { generateStructuredContent } from './llm_service.js';
 import { logger } from '../../app.js';
-import { Type, Schema } from '@google/genai';
 import { promptResolver, modelResolver } from './resolvers.js';
 
 interface IntentDetectionResult {
@@ -19,23 +18,24 @@ export async function detectIntent(userMessage: string, organizationId: string):
     const prompt = await promptResolver.resolve('ROUTER');
     const finalPrompt = `${prompt}\n\nUser Message: "${userMessage}"`;
 
-    // 3. Define the expected JSON Schema
-    const schema: Schema = {
-      type: Type.OBJECT,
+    // 3. Define the expected JSON Schema (provider-agnostic)
+    const schema = {
+      type: "object",
       properties: {
         intent: {
-          type: Type.STRING,
+          type: "string",
           description: 'The slug of the identified intent',
         },
         confidence: {
-          type: Type.NUMBER,
+          type: "number",
           description: 'Confidence score between 0.0 and 1.0',
         }
       },
       required: ['intent', 'confidence'],
     };
 
-    // 4. Call Gemini
+    // 4. Call LLM
+    logger.info(`Calling LLM with model: ${modelConfig.name}`);
     const result = await generateStructuredContent(
       finalPrompt,
       modelConfig.name,
@@ -44,8 +44,7 @@ export async function detectIntent(userMessage: string, organizationId: string):
     );
     
     if (result === null) {
-      // If generateStructuredContent returns null, it means the API failed (e.g., 429 Rate Limit)
-      logger.error('Gemini API returned null (likely an API error). Routing to api_error.');
+      logger.error('LLM API returned null (likely an API error). Routing to api_error.');
       return { intent: 'api_error', confidence: 0.0 };
     }
     

@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 
 export async function disconnectWhatsApp(sessionId: string) {
   const supabase = await createClient();
-  
+
   const { error } = await supabase
     .from("whatsapp_sessions")
     .delete()
@@ -20,14 +20,18 @@ export async function disconnectWhatsApp(sessionId: string) {
   return { success: true };
 }
 
-export async function updateApiKeys(botId: string, geminiKey: string) {
+export async function updateApiKeys(
+  botId: string,
+  apiKey: string,
+  provider: "gemini" | "groq" | "openrouter" = "groq"
+) {
   const supabase = await createClient();
-  
+
   const { error } = await supabase
     .from("bot_instances")
-    .update({ 
-      llm_api_key: geminiKey,
-      llm_provider: 'gemini'
+    .update({
+      llm_api_key: apiKey,
+      llm_provider: provider,
     })
     .eq("id", botId);
 

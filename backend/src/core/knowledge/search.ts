@@ -1,6 +1,6 @@
 import { supabase } from '../../config/supabase.js';
 import { logger } from '../../app.js';
-import { generateEmbedding } from '../ai/gemini.js';
+import { generateEmbedding } from '../ai/llm_service.js';
 
 export interface SearchResult {
   chunk_id: string;

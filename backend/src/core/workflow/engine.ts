@@ -1,9 +1,8 @@
 import { supabase } from '../../config/supabase.js';
 import { logger } from '../../app.js';
 import { sendWhatsAppMessage } from '../whatsapp/sender.js';
-import { generateStructuredContent, generateWithTools, generateAgenticResponse } from '../ai/gemini.js';
+import { generateStructuredContent, generateWithTools, generateAgenticResponse, buildGeminiTools } from '../ai/llm_service.js';
 import { executeExternalApi, executeIdempotentTool } from '../tools/executor.js';
-import { Type } from '@google/genai';
 import { modelResolver, promptResolver, contextBuilder } from '../ai/resolvers.js';
 import { configCache } from '../config/cache.js';
 import { searchKnowledge } from '../knowledge/search.js';
@@ -376,7 +375,7 @@ async function executeAiAgent(step: any, conversationId: string, remoteJid: stri
       if (params) {
         params.forEach(p => {
           properties[p.name] = { 
-            type: p.param_type === 'number' ? Type.NUMBER : (p.param_type === 'boolean' ? Type.BOOLEAN : Type.STRING),
+            type: p.param_type === 'number' ? 'number' : (p.param_type === 'boolean' ? 'boolean' : 'string'),
             description: p.description 
           };
           if (p.is_required) required.push(p.name);
@@ -387,7 +386,7 @@ async function executeAiAgent(step: any, conversationId: string, remoteJid: stri
         name: tool.name,
         description: tool.description,
         parameters: {
-          type: Type.OBJECT,
+          type: 'object',
           properties,
           required
         }
@@ -401,18 +400,18 @@ async function executeAiAgent(step: any, conversationId: string, remoteJid: stri
     name: 'request_human_handoff',
     description: 'Request human agent support ONLY when you genuinely cannot complete the customer task using your available tools, knowledge, and capabilities. Do NOT call this for tasks you can handle.',
     parameters: {
-      type: Type.OBJECT,
+      type: 'object',
       properties: {
         reason: {
-          type: Type.STRING,
+          type: 'string',
           description: 'Structured reason: AI_CANNOT_COMPLETE, REQUIRED_CAPABILITY_MISSING, REQUIRED_TOOL_UNAVAILABLE, SAFETY_REQUIRES_HUMAN',
         },
         required_team: {
-          type: Type.STRING,
+          type: 'string',
           description: 'Team capability needed (e.g. Appointment, Visa, Billing). Optional.',
         },
         summary: {
-          type: Type.STRING,
+          type: 'string',
           description: 'Brief summary of what the customer needs, for the human agent.',
         },
       },

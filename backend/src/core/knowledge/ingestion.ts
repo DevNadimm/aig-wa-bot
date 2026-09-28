@@ -1,6 +1,6 @@
 import { supabase } from '../../config/supabase.js';
 import { logger } from '../../app.js';
-import { generateEmbedding } from '../ai/gemini.js';
+import { generateEmbedding } from '../ai/llm_service.js';
 import * as net from 'net';
 import { createRequire } from 'module';
 

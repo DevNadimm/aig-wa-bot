@@ -19,6 +19,7 @@ export class ModelResolver {
     
     // Fallback or Router: prioritize 'flash' for routing to save tokens, otherwise pick first active
     const models = configCache.getTable('ai_models');
+    logger.info(`Cached models for router: ${models.map(m => m.name).join(', ')}`);
     
     let fallbackModel;
     if (purpose === 'ROUTER') {
