@@ -95,7 +95,7 @@ export default async function KnowledgePage() {
                     <TableCell className="text-right">
                       <Link href={`/dashboard/knowledge/${source.id}`}>
                         <Button variant="ghost" size="sm">
-                          <Edit01Icon className="h-4 w-4 mr-2" /> Edit01Icon
+                          <Edit01Icon className="h-4 w-4 mr-2" /> Edit
                         </Button>
                       </Link>
                     </TableCell>

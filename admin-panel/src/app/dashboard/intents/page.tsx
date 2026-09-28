@@ -77,7 +77,7 @@ export default async function IntentsPage() {
                     </TableCell>
                     <TableCell className="text-right">
                       <Button variant="ghost" size="sm">
-                        <Edit01Icon className="h-4 w-4 mr-2" /> Edit01Icon
+                        <Edit01Icon className="h-4 w-4 mr-2" /> Edit
                       </Button>
                     </TableCell>
                   </TableRow>
