@@ -1,5 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { BookOpen01Icon, SourceCodeIcon, BulbIcon, FlashIcon, ArrowRight01Icon, Robot01Icon, CloudServerIcon, Comment01Icon, Target01Icon, Activity01Icon, Wrench01Icon, UserGroup02Icon, ArrowUpRight01Icon } from "hugeicons-react";
+import { BookOpen01Icon, SourceCodeIcon, BulbIcon, FlashIcon, ArrowRight01Icon, Robot01Icon, CloudServerIcon, Comment01Icon, Target01Icon, Activity01Icon, Wrench01Icon, UserGroup02Icon, Settings02Icon } from "hugeicons-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
@@ -30,8 +30,8 @@ export default function DocsPage() {
                 </div>
               </div>
               <Link href="/dashboard/agents">
-                <Button variant="outline" size="sm" className="gap-2">
-                  Configure <ArrowUpRight01Icon className="h-4 w-4" />
+                <Button variant="secondary" size="sm">
+                  <Settings02Icon className="h-4 w-4 mr-2" /> Configure
                 </Button>
               </Link>
             </CardHeader>
@@ -60,8 +60,8 @@ export default function DocsPage() {
                 </div>
               </div>
               <Link href="/dashboard/intents">
-                <Button variant="outline" size="sm" className="gap-2">
-                  Configure <ArrowUpRight01Icon className="h-4 w-4" />
+                <Button variant="secondary" size="sm">
+                  <Settings02Icon className="h-4 w-4 mr-2" /> Configure
                 </Button>
               </Link>
             </CardHeader>
@@ -88,8 +88,8 @@ export default function DocsPage() {
                 </div>
               </div>
               <Link href="/dashboard/workflows">
-                <Button variant="outline" size="sm" className="gap-2">
-                  Configure <ArrowUpRight01Icon className="h-4 w-4" />
+                <Button variant="secondary" size="sm">
+                  <Settings02Icon className="h-4 w-4 mr-2" /> Configure
                 </Button>
               </Link>
             </CardHeader>
@@ -118,8 +118,8 @@ export default function DocsPage() {
                 </div>
               </div>
               <Link href="/dashboard/tools">
-                <Button variant="outline" size="sm" className="gap-2">
-                  Configure <ArrowUpRight01Icon className="h-4 w-4" />
+                <Button variant="secondary" size="sm">
+                  <Settings02Icon className="h-4 w-4 mr-2" /> Configure
                 </Button>
               </Link>
             </CardHeader>
@@ -146,8 +146,8 @@ export default function DocsPage() {
                 </div>
               </div>
               <Link href="/dashboard/knowledge">
-                <Button variant="outline" size="sm" className="gap-2">
-                  Configure <ArrowUpRight01Icon className="h-4 w-4" />
+                <Button variant="secondary" size="sm">
+                  <Settings02Icon className="h-4 w-4 mr-2" /> Configure
                 </Button>
               </Link>
             </CardHeader>
@@ -174,8 +174,8 @@ export default function DocsPage() {
                 </div>
               </div>
               <Link href="/dashboard/human-agents">
-                <Button variant="outline" size="sm" className="gap-2">
-                  Configure <ArrowUpRight01Icon className="h-4 w-4" />
+                <Button variant="secondary" size="sm">
+                  <Settings02Icon className="h-4 w-4 mr-2" /> Configure
                 </Button>
               </Link>
             </CardHeader>
