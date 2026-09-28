@@ -582,11 +582,11 @@ IMPORTANT INSTRUCTIONS:
                 return { type: 'HANDOFF' as const, reason: args?.summary };
               }
               // If not approved, continue AI processing
-              toolResults.push({ functionResponse: { name: call.name, response: { status: 'rejected', message: 'Handoff not required. Please continue helping the customer.' } } });
+              toolResults.push({ functionResponse: { name: call.name, response: { status: 'rejected', message: 'Handoff not required. Please continue helping the customer.' }, id: call.id } });
               continue;
             } catch (handoffErr) {
               logger.error({ err: handoffErr }, 'Handoff decision evaluation failed');
-              toolResults.push({ functionResponse: { name: call.name, response: { error: 'Handoff evaluation failed' } } });
+              toolResults.push({ functionResponse: { name: call.name, response: { error: 'Handoff evaluation failed' }, id: call.id } });
               continue;
             }
           }
@@ -668,7 +668,7 @@ IMPORTANT INSTRUCTIONS:
             logger.warn({ event: 'tool_permission_denied', tool_name: call.name });
             apiData = { error: "Tool permission denied or tool not found." };
           }
-          toolResults.push({ functionResponse: { name: call.name, response: apiData } });
+          toolResults.push({ functionResponse: { name: call.name, response: apiData, id: call.id } });
         }
       
       const parts: any[] = [];

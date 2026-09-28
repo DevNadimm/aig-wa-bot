@@ -311,14 +311,46 @@ export async function generateAgenticResponse(
       // OpenAI-compatible path
       const client = makeOpenAICompatibleClient(key, provider);
 
-      // Convert Gemini contents → OpenAI messages
-      const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [];
-      if (systemInstruction) messages.push({ role: "system", content: systemInstruction });
-      for (const c of contents) {
-        const role = c.role === "model" ? "assistant" : "user";
-        const text = c.parts?.map((p: any) => p.text ?? "").join(" ") ?? "";
-        messages.push({ role, content: text });
-      }
+              // Convert Gemini contents to OpenAI messages
+        const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [];
+        if (systemInstruction) messages.push({ role: "system", content: systemInstruction });
+        
+        let toolCallIdCounter = 1;
+        
+        for (const c of contents) {
+          const role = c.role === "model" ? "assistant" : "user";
+          
+          const textParts = c.parts?.filter((p: any) => p.text).map((p: any) => p.text) || [];
+          const text = textParts.join(" ");
+
+          const functionCalls = c.parts?.filter((p: any) => p.functionCall).map((p: any) => p.functionCall) || [];
+          const functionResponses = c.parts?.filter((p: any) => p.functionResponse).map((p: any) => p.functionResponse) || [];
+
+          if (functionCalls.length > 0) {
+            const tool_calls: any[] = functionCalls.map((fc: any) => ({
+              id: fc.id || `call_${toolCallIdCounter++}`,
+              type: "function",
+              function: {
+                name: fc.name,
+                arguments: JSON.stringify(fc.args || {})
+              }
+            }));
+            messages.push({ role: "assistant", content: text || null, tool_calls });
+          } else if (functionResponses.length > 0) {
+            if (text) {
+              messages.push({ role, content: text });
+            }
+            for (const fr of functionResponses) {
+              messages.push({
+                role: "tool",
+                tool_call_id: fr.id || `call_${toolCallIdCounter - 1}`,
+                content: typeof fr.response === "string" ? fr.response : JSON.stringify(fr.response)
+              });
+            }
+          } else {
+            messages.push({ role, content: text });
+          }
+        }
 
       // Convert Gemini tool declarations → OpenAI format
       const openAiTools: OpenAI.Chat.ChatCompletionTool[] =
@@ -344,8 +376,8 @@ export async function generateAgenticResponse(
       const chat = await client.chat.completions.create(chatParams);
       const choice = chat.choices[0];
 
-      // Map OpenAI tool_calls → Gemini-style functionCalls
-      const functionCalls = choice.message.tool_calls?.map((tc) => ({
+      // Map OpenAI tool_calls -> Gemini-style functionCalls
+      const functionCalls = choice.message.tool_calls?.map((tc: any) => ({
         name: tc.function.name,
         args: JSON.parse(tc.function.arguments ?? "{}"),
         id: tc.id,
