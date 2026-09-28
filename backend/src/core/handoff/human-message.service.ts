@@ -109,7 +109,7 @@ export async function storeCustomerMessageInHumanMode(
             conversationId: conversationId,
             eventType: HandoffEventType.CUSTOMER_MESSAGE_IN_HUMAN_MODE,
             actorType: ActorType.SYSTEM,
-            actorId: 'SYSTEM',
+            actorId: null as unknown as string,
             metadata: { assignedAgentId }
         });
         logger.info({ event: 'STORE_CUSTOMER_MESSAGE_HUMAN_MODE_SUCCESS', conversationId });
