@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Comment01Icon, DashboardCircleIcon, GitMergeIcon, Settings01Icon, AiBrain01Icon, Database01Icon, Link01Icon, Logout01Icon, BotIcon, UserGroupIcon } from "hugeicons-react";
+import { Comment01Icon, DashboardCircleIcon, GitMergeIcon, Settings01Icon, AiBrain01Icon, Database01Icon, Link01Icon, Logout01Icon, BotIcon, UserGroupIcon, ToolCaseIcon } from "hugeicons-react";
 
 import { Button } from "@/components/ui/button";
 import { signOut } from"./actions";
@@ -41,7 +41,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
     { name:"Knowledge Base", href:"/dashboard/knowledge", icon: Database01Icon, roles: ['admin'] },
     { name:"Intents", href:"/dashboard/intents", icon: AiBrain01Icon, roles: ['admin'] },
     { name:"Workflows", href:"/dashboard/workflows", icon: GitMergeIcon, roles: ['admin'] },
-    { name:"Tools & APIs", href:"/dashboard/tools", icon: Link01Icon, roles: ['admin'] },
+    { name:"Tools & APIs", href:"/dashboard/tools", icon: ToolCaseIcon, roles: ['admin'] },
     { name:"AI Agents", href:"/dashboard/agents", icon: BotIcon, roles: ['admin'] },
     { name:"Team & Agents", href:"/dashboard/human-agents", icon: UserGroupIcon, roles: ['admin'] },
     { name:"Settings", href:"/dashboard/settings", icon: Settings01Icon, roles: ['admin'] },

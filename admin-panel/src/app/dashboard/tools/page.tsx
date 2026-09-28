@@ -2,7 +2,7 @@ import { createClient } from"@/lib/supabase/server";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from"@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from"@/components/ui/table";
 import Link from"next/link";
-import { AddCircleIcon, PencilEdit02Icon, Settings02Icon, Link01Icon } from "hugeicons-react";
+import { AddCircleIcon, PencilEdit02Icon, Settings02Icon, ToolCaseIcon } from "hugeicons-react";
 import { Button } from"@/components/ui/button";
 
 export default async function ToolsPage() {
@@ -38,7 +38,7 @@ export default async function ToolsPage() {
             <div className="text-red-500 py-4">Error loading tools: {error.message}</div>
           ) : (!tools || tools.length === 0) ? (
             <div className="text-center py-12 border-2 border-dashed border-zinc-800 rounded-lg mt-6">
-              <Link01Icon className="h-10 w-10 text-zinc-600 mx-auto mb-3" />
+              <ToolCaseIcon className="h-10 w-10 text-zinc-600 mx-auto mb-3" />
               <h3 className="text-zinc-300 font-medium text-lg">No Tools Configured</h3>
               <p className="text-zinc-500 text-sm mt-1 mb-4">Add a tool to allow your AI Agents to interact with external systems.</p>
               <Link href="/dashboard/tools/new">
