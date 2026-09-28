@@ -12,6 +12,21 @@ export default async function HumanAgentsPage() {
   const { data: agents, error } = await supabase.from('human_agents').select('*, agent_teams!human_agents_team_id_fkey(name)')
   
   if (error) console.error("Error fetching agents:", error);
+
+  const { data: activeConvs } = await supabase
+    .from('conversations')
+    .select('assigned_agent_id')
+    .eq('state', 'HANDOFF')
+    .not('assigned_agent_id', 'is', null);
+
+  const activeCounts: Record<string, number> = {};
+  if (activeConvs) {
+    for (const conv of activeConvs) {
+      if (conv.assigned_agent_id) {
+        activeCounts[conv.assigned_agent_id] = (activeCounts[conv.assigned_agent_id] || 0) + 1;
+      }
+    }
+  }
   
   return (
     <div className="space-y-6">
@@ -77,7 +92,9 @@ export default async function HumanAgentsPage() {
                         {agent.status}
                       </span>
                     </TableCell>
-                    <TableCell className="text-zinc-400 text-right font-medium">{agent.max_concurrent_conversations || 10}</TableCell>
+                    <TableCell className="text-zinc-400 text-right font-medium">
+                      <span className="text-zinc-100">{activeCounts[agent.id] || 0}</span> <span className="text-zinc-600">/ {agent.max_concurrent_conversations || 10}</span>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
