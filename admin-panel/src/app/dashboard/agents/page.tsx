@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from"@/comp
 import { Button } from"@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from"@/components/ui/table";
 import Link from"next/link";
-import { AddCircleIcon, Edit01Icon, Robot01Icon, CpuIcon, EyeIcon } from "hugeicons-react";
+import { AddCircleIcon, PencilEdit02Icon, Robot01Icon, CpuIcon, EyeIcon } from "hugeicons-react";
 import { ExpandableText } from"../intents/ExpandableText";
 import { ViewAgentDialog } from"./ViewAgentDialog";
 
@@ -105,7 +105,7 @@ export default async function AgentsPage() {
                         <ViewAgentDialog agent={agent} />
                         <Link href={`/dashboard/agents/${agent.id}`}>
                           <Button variant="ghost" size="sm">
-                            <Edit01Icon className="h-4 w-4 mr-2" /> Edit
+                            <PencilEdit02Icon className="h-4 w-4 mr-2" /> Edit
                           </Button>
                         </Link>
                       </div>

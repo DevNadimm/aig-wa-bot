@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from"@/comp
 import { Button } from"@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from"@/components/ui/table";
 import Link from"next/link";
-import { AddCircleIcon, Edit01Icon, Settings02Icon } from "hugeicons-react";
+import { AddCircleIcon, PencilEdit02Icon, Settings02Icon } from "hugeicons-react";
 import { ExpandableText } from"../intents/ExpandableText";
 
 export default async function WorkflowsPage() {
@@ -81,7 +81,7 @@ export default async function WorkflowsPage() {
                     <TableCell className="text-right">
                       <Link href={`/dashboard/workflows/${workflow.id}`}>
                         <Button variant="ghost" size="sm">
-                          <Edit01Icon className="h-4 w-4 mr-2" /> Builder
+                          <PencilEdit02Icon className="h-4 w-4 mr-2" /> Builder
                         </Button>
                       </Link>
                     </TableCell>

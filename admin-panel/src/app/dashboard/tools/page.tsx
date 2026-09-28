@@ -2,7 +2,7 @@ import { createClient } from"@/lib/supabase/server";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from"@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from"@/components/ui/table";
 import Link from"next/link";
-import { AddCircleIcon, Edit01Icon, Settings02Icon, Link01Icon } from "hugeicons-react";
+import { AddCircleIcon, PencilEdit02Icon, Settings02Icon, Link01Icon } from "hugeicons-react";
 import { Button } from"@/components/ui/button";
 
 export default async function ToolsPage() {

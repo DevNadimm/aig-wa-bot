@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from"@/comp
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from"@/components/ui/table";
 import { Button } from"@/components/ui/button";
 import Link from"next/link";
-import { AddCircleIcon, Edit01Icon } from "hugeicons-react";
+import { AddCircleIcon, PencilEdit02Icon } from "hugeicons-react";
 
 import { ExpandableText } from"./ExpandableText";
 
@@ -77,7 +77,7 @@ export default async function IntentsPage() {
                     </TableCell>
                     <TableCell className="text-right">
                       <Button variant="ghost" size="sm">
-                        <Edit01Icon className="h-4 w-4 mr-2" /> Edit
+                        <PencilEdit02Icon className="h-4 w-4 mr-2" /> Edit
                       </Button>
                     </TableCell>
                   </TableRow>
