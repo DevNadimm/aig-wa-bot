@@ -35,7 +35,7 @@ let cachedConfig: BotConfig | null = null;
 let lastConfigFetch = 0;
 const CONFIG_TTL_MS = 60_000;
 
-async function getBotConfig(): Promise<BotConfig> {
+export async function getBotConfig(): Promise<BotConfig> {
   const now = Date.now();
   if (cachedConfig && now - lastConfigFetch < CONFIG_TTL_MS) {
     return cachedConfig;
@@ -144,31 +144,7 @@ function makeOpenAICompatibleClient(key: string, provider: LLMProvider): OpenAI 
 // ──────────────────────────────────────────────
 
 function normaliseModelName(modelName: string, provider: LLMProvider): string {
-  if (provider === "gemini") return modelName; // keep as-is (e.g. "gemini-3.8-flash")
-
-  // For OpenAI-compatible providers, map common Gemini names → provider equivalents
-  const GROQ_MODELS: Record<string, string> = {
-    "gemini-3.8-flash": "openai/gpt-oss-20b",
-    "gemini-3.5-flash": "openai/gpt-oss-20b",
-    "gemini-3.5-flash-lite": "allam-2-7b",
-    "gemini-3.1-pro-preview": "openai/gpt-oss-120b",
-    "gemini-2.5-flash": "openai/gpt-oss-20b",
-    "gemini-2.5-pro": "openai/gpt-oss-120b",
-  };
-
-  const OPENROUTER_MODELS: Record<string, string> = {
-    "gemini-3.8-flash": "meta-llama/llama-3.3-70b-instruct:free",
-    "gemini-3.5-flash": "meta-llama/llama-3.1-70b-instruct:free",
-    "gemini-3.5-flash-lite": "meta-llama/llama-3-8b-instruct:free",
-    "gemini-3.1-pro-preview": "meta-llama/llama-3.3-70b-instruct:free",
-    "gemini-2.5-flash": "meta-llama/llama-3.3-70b-instruct:free",
-    "gemini-2.5-pro": "meta-llama/llama-3.3-70b-instruct:free",
-  };
-
-  if (provider === "groq") return GROQ_MODELS[modelName] ?? "openai/gpt-oss-20b";
-  if (provider === "openrouter")
-    return OPENROUTER_MODELS[modelName] ?? "meta-llama/llama-3.3-70b-instruct:free";
-
+  // No translation layer. The exact model ID from DB is used.
   return modelName;
 }
 

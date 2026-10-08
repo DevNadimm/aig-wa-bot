@@ -1,3 +1,6 @@
+import { TypeChip } from "@/components/ui/type-chip";
+import { EmptyState } from "@/components/ui/empty-state";
+import { StatusChip } from "@/components/ui/status-chip";
 import { createClient } from "@/lib/supabase/server"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -48,16 +51,9 @@ export default async function HumanAgentsPage() {
           <CardTitle className="text-lg text-zinc-100">Human Agents Roster</CardTitle>
           <CardDescription className="text-zinc-400">List of support agents mapped to specific teams or skills.</CardDescription>
         </CardHeader>
-        <CardContent className="pt-6">
+        <CardContent>
           {!agents || agents.length === 0 ? (
-            <div className="text-center py-12 border-2 border-dashed border-zinc-800 rounded-lg">
-              <UserGroupIcon className="h-10 w-10 text-zinc-600 mx-auto mb-3" />
-              <h3 className="text-zinc-300 font-medium text-lg">No Agents Configured</h3>
-              <p className="text-zinc-500 text-sm mt-1 mb-4">Add your first human agent to handle live chat handoffs.</p>
-              <Link href="/dashboard/human-agents/new">
-                <Button variant="outline" className="border-zinc-700 text-zinc-300 hover:bg-zinc-800 hover:text-white">Create Agent</Button>
-              </Link>
-            </div>
+            <EmptyState icon={UserGroupIcon} title="No Agents Configured" description="Add your first human agent to handle live chat handoffs." actionLabel="Create Agent" actionHref="/dashboard/human-agents/new" />
           ) : (
             <Table>
               <TableHeader>
@@ -76,21 +72,13 @@ export default async function HumanAgentsPage() {
                     <TableCell className="text-zinc-400">{agent.email || '-'}</TableCell>
                     <TableCell className="text-zinc-400">
                       {agent.agent_teams ? (
-                        <span className="px-2 py-1 rounded-md text-xs font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20">
-                          {agent.agent_teams.name}
-                        </span>
+                        <TypeChip label={agent.agent_teams.name} variant="blue" />
                       ) : (
                         <span className="text-zinc-500 italic">No Skill (General)</span>
                       )}
                     </TableCell>
                     <TableCell>
-                      <span className={`inline-flex items-center rounded-md px-2 py-1 text-[10px] font-medium ${
-                        agent.status === 'ACTIVE' 
-                          ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' 
-                          : 'bg-zinc-500/10 text-zinc-400 border border-zinc-500/20'
-                      }`}>
-                        {agent.status}
-                      </span>
+                      <StatusChip label={agent.status} />
                     </TableCell>
                     <TableCell className="text-zinc-400 text-right font-medium">
                       <span className="text-zinc-100">{activeCounts[agent.id] || 0}</span> <span className="text-zinc-600">/ {agent.max_concurrent_conversations || 10}</span>

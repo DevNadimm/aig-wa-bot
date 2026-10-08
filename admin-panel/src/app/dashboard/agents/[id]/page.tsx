@@ -17,11 +17,18 @@ export default async function EditAgentPage({
   const { id } = await params;
   const supabase = await createClient();
   
-  const { data: models } = await supabase.from("ai_models").select("id, name").eq("is_active", true);
+  const { data: botInstance } = await supabase.from('bot_instances').select('llm_provider').limit(1).single();
+  const activeProvider = botInstance?.llm_provider || 'gemini';
+  
+  const { data: models } = await supabase
+    .from("ai_models")
+    .select("id, name, provider")
+    .eq("is_active", true)
+    .eq("provider", activeProvider);
   
   const { data: agent, error } = await supabase
     .from("ai_agents")
-    .select("*")
+    .select("*, ai_models(provider)")
     .eq("id", id)
     .single();
 
@@ -105,25 +112,34 @@ export default async function EditAgentPage({
               </div>
             </div>
 
-            <hr className="border-zinc-800/50" />
-
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="col-span-1">
                 <Label htmlFor="model_id" className="text-zinc-200 font-medium text-sm">AI Model</Label>
-                <p className="text-zinc-500 text-sm mt-1">Select the underlying language model to use.</p>
+                <p className="text-zinc-500 text-sm mt-1">Select the exact model to use for this agent. Only models from the globally active provider ({activeProvider}) are shown.</p>
               </div>
               <div className="col-span-2">
-                <select 
-                  id="model_id" 
-                  name="model_id" 
-                  defaultValue={agent.model_id}
-                  className="w-full h-10 px-3 py-2 bg-[#121214] border border-zinc-700 text-zinc-100 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 text-sm"
-                  required
-                >
-                  {models?.map(model => (
-                    <option key={model.id} value={model.id}>{model.name}</option>
-                  ))}
-                </select>
+                {models && models.length > 0 ? (
+                  <select 
+                    id="model_id" 
+                    name="model_id" 
+                    defaultValue={agent.model_id}
+                    className="w-full h-10 px-3 py-2 bg-[#121214] border border-zinc-700 text-zinc-100 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 text-sm"
+                    required
+                  >
+                    {models.map(model => (
+                      <option key={model.id} value={model.id}>{model.name}</option>
+                    ))}
+                  </select>
+                ) : (
+                  <div className="w-full h-10 px-3 py-2 bg-[#121214] border border-red-900/50 text-red-400 rounded-md text-sm flex items-center">
+                    No active models configured for '{activeProvider}'.
+                  </div>
+                )}
+                {agent.ai_models?.provider !== activeProvider && (
+                  <p className="text-red-400 text-sm mt-2 font-medium">
+                    Warning: This agent is currently using a model from '{agent.ai_models?.provider}', which does not match the active global provider '{activeProvider}'. Execution will fail until updated.
+                  </p>
+                )}
               </div>
             </div>
 

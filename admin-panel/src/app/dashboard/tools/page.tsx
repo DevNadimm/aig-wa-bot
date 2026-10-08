@@ -1,3 +1,5 @@
+import { TypeChip } from "@/components/ui/type-chip";
+import { EmptyState } from "@/components/ui/empty-state";
 import { createClient } from"@/lib/supabase/server";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from"@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from"@/components/ui/table";
@@ -37,16 +39,9 @@ export default async function ToolsPage() {
           {error ? (
             <div className="text-red-500 py-4">Error loading tools: {error.message}</div>
           ) : (!tools || tools.length === 0) ? (
-            <div className="text-center py-12 border-2 border-dashed border-zinc-800 rounded-lg mt-6">
-              <ToolsIcon className="h-10 w-10 text-zinc-600 mx-auto mb-3" />
-              <h3 className="text-zinc-300 font-medium text-lg">No Tools Configured</h3>
-              <p className="text-zinc-500 text-sm mt-1 mb-4">Add a tool to allow your AI Agents to interact with external systems.</p>
-              <Link href="/dashboard/tools/new">
-                <Button>Create Tool</Button>
-              </Link>
-            </div>
+            <EmptyState icon={ToolsIcon} title="No Tools Configured" description="Add a tool to allow your AI Agents to interact with external systems." actionLabel="Create Tool" actionHref="/dashboard/tools/new" />
           ) : (
-            <Table className="mt-4">
+            <Table>
               <TableHeader>
                 <TableRow className="border-zinc-800/50 hover:bg-transparent">
                   <TableHead className="text-zinc-400">Name</TableHead>
@@ -61,9 +56,7 @@ export default async function ToolsPage() {
                   <TableRow key={tool.id} className="border-zinc-800/50 hover:bg-zinc-900/50">
                     <TableCell className="font-medium text-zinc-200">{tool.name}</TableCell>
                     <TableCell>
-                      <span className="inline-flex items-center rounded-md bg-zinc-900 px-2 py-1 text-xs font-mono font-medium text-zinc-300 ring-1 ring-inset ring-zinc-700">
-                        {tool.tool_type || 'REST_API'}
-                      </span>
+                      <TypeChip label={tool.tool_type || 'REST_API'} />
                     </TableCell>
                     <TableCell className="text-zinc-400 max-w-[400px] min-w-[200px] truncate">
                       {tool.description}

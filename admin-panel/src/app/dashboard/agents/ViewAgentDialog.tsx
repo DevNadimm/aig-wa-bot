@@ -11,13 +11,13 @@ export function ViewAgentDialog({ agent }: { agent: any }) {
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px] bg-[#0c0c0e] border-zinc-800 text-zinc-100">
         <DialogHeader>
-          <div className="flex items-center gap-3 mb-2">
-            <div className="h-10 w-10 rounded-xl bg-indigo-500/20 flex items-center justify-center">
-              <Robot01Icon className="h-6 w-6 text-indigo-400" />
+          <div className="flex items-center gap-4 mb-2">
+            <div className="p-3 bg-emerald-500/10 rounded-lg">
+              <Robot01Icon className="h-6 w-6 text-emerald-400" />
             </div>
             <div>
-              <DialogTitle className="text-xl">{agent.name}</DialogTitle>
-              <DialogDescription className="text-zinc-400 mt-1">
+              <DialogTitle className="text-lg text-zinc-100 font-semibold leading-none tracking-tight">{agent.name}</DialogTitle>
+              <DialogDescription className="text-sm text-zinc-400 mt-1">
                 {agent.description}
               </DialogDescription>
             </div>
@@ -25,20 +25,11 @@ export function ViewAgentDialog({ agent }: { agent: any }) {
         </DialogHeader>
         
         <div className="space-y-6 pt-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1">
-              <p className="text-xs font-medium text-zinc-500 uppercase tracking-wider">AI Model</p>
-              <div className="flex items-center gap-2 text-zinc-200">
-                <CpuIcon className="h-4 w-4 text-zinc-400" />
-                {agent.ai_models?.name ||"Unknown"}
-              </div>
-            </div>
-            <div className="space-y-1">
-              <p className="text-xs font-medium text-zinc-500 uppercase tracking-wider">Language & Temp</p>
-              <p className="text-zinc-200 capitalize">
-                {agent.language} &bull; {agent.temperature}
-              </p>
-            </div>
+          <div className="space-y-1">
+            <p className="text-xs font-medium text-zinc-500 uppercase tracking-wider">Language & Temp</p>
+            <p className="text-zinc-200 capitalize">
+              {agent.language} &bull; {agent.temperature}
+            </p>
           </div>
           
           <div className="space-y-2">

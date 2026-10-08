@@ -2,6 +2,7 @@ import { makeWASocket, useMultiFileAuthState, DisconnectReason, fetchLatestBaile
 import { logger } from '../../app.js';
 import { globalConfig } from '../../server.js';
 import { processIncomingMessage } from '../conversations/pipeline.js';
+import { MessageDebouncer, BufferedMessage } from '../conversations/debounce.js';
 import { Boom } from '@hapi/boom';
 import path from 'path';
 
@@ -20,6 +21,28 @@ let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 
 // LID to Phone number mapping (Baileys v6+ uses LID format for DMs)
 const lidToPhone = new Map<string, string>();
+
+// Debounce service: buffers rapid-fire messages from the same user
+// and concatenates them before sending to the AI pipeline.
+const DEBOUNCE_MS = parseInt(process.env.WA_DEBOUNCE_MS || '3000', 10);
+
+const debouncer = new MessageDebouncer(async (merged: BufferedMessage) => {
+  try {
+    await processIncomingMessage(
+      merged.remoteJid,
+      merged.text,
+      merged.botId,
+      merged.organizationId,
+      merged.realPhone,
+      merged.pushName,
+      merged.messageId,
+      merged.lid,
+      merged.isFromMe
+    );
+  } catch (err) {
+    logger.error({ err }, 'Pipeline execution failed (debounced)');
+  }
+}, DEBOUNCE_MS);
 
 export async function initWhatsApp(sessionName: string = 'default') {
   // Clear any pending reconnect timer
@@ -180,11 +203,22 @@ export async function initWhatsApp(sessionName: string = 'default') {
         
         logger.info(`Received message from ${remoteJid} (phone: ${realPhone}, name: ${pushName}): ${text}`);
         
-        // Pass message to Message Pipeline
+        // Pass message to Message Pipeline via debounce buffer.
+        // If the user sends multiple messages rapidly, they are concatenated
+        // into a single message before the AI processes them.
         if (text && remoteJid && messageId) {
           const lid = remoteJid.endsWith('@lid') ? remoteJid.split('@')[0] : undefined;
-          processIncomingMessage(remoteJid, text, globalConfig.botId, globalConfig.orgId, realPhone, pushName, messageId, lid, isFromMe).catch(err => {
-            logger.error({ err }, 'Pipeline execution failed');
+          debouncer.push({
+            remoteJid,
+            text,
+            botId: globalConfig.botId,
+            organizationId: globalConfig.orgId,
+            realPhone,
+            pushName,
+            messageId,
+            lid,
+            isFromMe,
+            receivedAt: Date.now(),
           });
         }
       }

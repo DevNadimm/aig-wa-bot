@@ -11,6 +11,21 @@ export async function sendMessage(conversationId: string, content: string) {
   
   if (!user) throw new Error("Unauthorized")
 
+  // Get agent name and type
+  let senderName = 'AGENT';
+  let senderType = 'HUMAN';
+  const { data: agentData } = await supabase.from('human_agents').select('name').eq('auth_user_id', user.id).single();
+  
+  if (agentData?.name) {
+    senderName = agentData.name;
+  } else {
+    // If not an agent, check if it's an admin
+    const { data: adminData } = await supabase.from('admins').select('id').eq('id', user.id).single();
+    if (adminData) {
+      senderType = 'ADMIN';
+    }
+  }
+
   // We need to fetch the customer's phone or lid to send the WhatsApp message
   const { data: conv } = await supabase
     .from("conversations")
@@ -40,7 +55,8 @@ export async function sendMessage(conversationId: string, content: string) {
         agentId: user.id, // Set the sender as the human agent
         phone,
         lid,
-        senderType: 'HUMAN',
+        senderType,
+        senderName,
         text: content
       })
     })
@@ -80,6 +96,15 @@ export async function changeConversationState(conversationId: string, state: 'HU
     }
   }
 
+  // Fetch the conversation before updating to check the previous state
+  const { data: convBefore } = await supabase
+    .from("conversations")
+    .select("state, customers(phone, whatsapp_lid)")
+    .eq("id", conversationId)
+    .single()
+    
+  const previousState = convBefore?.state;
+
   const { error } = await supabase
     .from("conversations")
     .update({ 
@@ -94,15 +119,10 @@ export async function changeConversationState(conversationId: string, state: 'HU
   }
 
   // If handing over to human, send an automatic notification message
-  if (state === 'HUMAN_ACTIVE') {
+  // BUT only if the AI hasn't already sent a handover wait message (previousState !== 'WAITING_HUMAN')
+  if (state === 'HUMAN_ACTIVE' && previousState !== 'WAITING_HUMAN') {
     try {
-      const { data: conv } = await supabase
-        .from("conversations")
-        .select("customers(phone, whatsapp_lid)")
-        .eq("id", conversationId)
-        .single()
-        
-      const customerData = (Array.isArray(conv?.customers) ? conv.customers[0] : conv?.customers) as any
+      const customerData = (Array.isArray(convBefore?.customers) ? convBefore.customers[0] : convBefore?.customers) as any
       const phone = customerData?.phone
       const lid = customerData?.whatsapp_lid
       
@@ -118,7 +138,7 @@ export async function changeConversationState(conversationId: string, state: 'HU
             phone,
             lid,
             senderType: 'SYSTEM',
-            text: "*[System]* A human agent has joined the chat and will assist you shortly."
+            text: "A human agent has joined the chat and will assist you shortly."
           })
         })
       }
@@ -144,6 +164,15 @@ export async function assignConversationToAgent(conversationId: string, agentId:
 
   const state = agentId ? 'HUMAN_ACTIVE' : 'AI_ACTIVE'
 
+  // Fetch the conversation before updating to check the previous state
+  const { data: convBefore } = await supabase
+    .from("conversations")
+    .select("state, customers(phone, whatsapp_lid)")
+    .eq("id", conversationId)
+    .single()
+    
+  const previousState = convBefore?.state;
+
   const { error } = await supabase
     .from("conversations")
     .update({ 
@@ -157,15 +186,10 @@ export async function assignConversationToAgent(conversationId: string, agentId:
     throw new Error(error.message)
   }
 
-  if (agentId) {
+  // If assigning a human agent, send notification ONLY if we weren't already waiting for one
+  if (agentId && previousState !== 'WAITING_HUMAN') {
     try {
-      const { data: conv } = await supabase
-        .from("conversations")
-        .select("customers(phone, whatsapp_lid)")
-        .eq("id", conversationId)
-        .single()
-
-      const customerData = (Array.isArray(conv?.customers) ? conv.customers[0] : conv?.customers) as any
+      const customerData = (Array.isArray(convBefore?.customers) ? convBefore.customers[0] : convBefore?.customers) as any
       const phone = customerData?.phone
       const lid = customerData?.whatsapp_lid
 
@@ -181,7 +205,7 @@ export async function assignConversationToAgent(conversationId: string, agentId:
             phone,
             lid,
             senderType: 'SYSTEM',
-            text: "*[System]* A human agent has joined the chat and will assist you shortly."
+            text: "A human agent has joined the chat and will assist you shortly."
           })
         })
       }

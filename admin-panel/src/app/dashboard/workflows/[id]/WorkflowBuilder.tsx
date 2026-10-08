@@ -229,7 +229,7 @@ export function WorkflowBuilder({ workflowId, initialSteps }: { workflowId: stri
 
                     <div className="flex justify-end pt-4 border-t border-zinc-800/50">
                       <Button onClick={() => handleSaveStep(step.id)}>
-                        <FloppyDiskIcon className="h-4 w-4" /> FloppyDiskIcon Configuration
+                        <FloppyDiskIcon className="h-4 w-4 mr-2" /> Save Configuration
                       </Button>
                     </div>
                   </CardContent>

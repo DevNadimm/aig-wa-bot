@@ -15,16 +15,21 @@ export async function updateAgent(formData: FormData) {
   const temperature = parseFloat(formData.get("temperature") as string ||"0.7")
   const language = formData.get("language") as string
   
+  const updateData: any = {
+    name,
+    description,
+    system_prompt: systemPrompt,
+    temperature,
+    language,
+  }
+  
+  if (modelId) {
+    updateData.model_id = modelId;
+  }
+  
   const { error } = await supabase
     .from("ai_agents")
-    .update({
-      name,
-      description,
-      system_prompt: systemPrompt,
-      model_id: modelId,
-      temperature,
-      language,
-    })
+    .update(updateData)
     .eq("id", id)
 
   if (error) {

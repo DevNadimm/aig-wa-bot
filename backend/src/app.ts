@@ -62,7 +62,7 @@ export function createApp(): Express {
         });
       });
 
-      const { phone, lid, text, conversationId, senderType } = req.body;
+      const { phone, lid, text, conversationId, senderType, senderName } = req.body;
       const { sendWhatsAppMessage } = await import('./core/whatsapp/sender.js');
       
       let remoteJid = '';
@@ -73,7 +73,7 @@ export function createApp(): Express {
           const isLid = phone && phone.toString().length >= 15;
           remoteJid = isLid ? `${phone}@lid` : `${phone}@s.whatsapp.net`;
       }
-      await sendWhatsAppMessage(remoteJid, text, conversationId, senderType || 'AI');
+      await sendWhatsAppMessage(remoteJid, text, conversationId, senderType || 'AI', senderName);
       res.json({ success: true });
     } catch (error: any) {
       if (!res.headersSent) {

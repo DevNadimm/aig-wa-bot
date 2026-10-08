@@ -1,3 +1,6 @@
+import { TypeChip } from "@/components/ui/type-chip";
+import { EmptyState } from "@/components/ui/empty-state";
+import { StatusChip } from "@/components/ui/status-chip";
 import { createClient } from"@/lib/supabase/server";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from"@/components/ui/card";
 import { Button } from"@/components/ui/button";
@@ -41,16 +44,9 @@ export default async function KnowledgePage() {
           {error ? (
             <div className="text-red-500 py-4">Error loading knowledge: {error.message}</div>
           ) : !sources || sources.length === 0 ? (
-            <div className="text-center py-12 border-2 border-dashed border-zinc-800 rounded-lg mt-6">
-              <Database01Icon className="h-10 w-10 text-zinc-600 mx-auto mb-3" />
-              <h3 className="text-zinc-300 font-medium text-lg">No Knowledge Added</h3>
-              <p className="text-zinc-500 text-sm mt-1 mb-4">Add your first FAQ or document text for the AI to learn from.</p>
-              <Link href="/dashboard/knowledge/new">
-                <Button>Add Knowledge</Button>
-              </Link>
-            </div>
+            <EmptyState icon={Database01Icon} title="No Knowledge Added" description="Add your first FAQ or document text for the AI to learn from." actionLabel="Add Knowledge" actionHref="/dashboard/knowledge/new" />
           ) : (
-            <Table className="mt-4">
+            <Table>
               <TableHeader>
                 <TableRow className="border-zinc-800/50 hover:bg-transparent">
                   <TableHead className="text-zinc-400">Title / Name</TableHead>
@@ -67,30 +63,17 @@ export default async function KnowledgePage() {
                   return (
                   <TableRow key={source.id} className="border-zinc-800/50 hover:bg-zinc-900/50">
                     <TableCell className="font-medium text-zinc-200">
-                      <div className="flex items-center gap-2">
-                        <div className="h-6 w-6 rounded bg-indigo-500/10 flex items-center justify-center">
-                          <File01Icon className="h-3 w-3 text-indigo-400" />
-                        </div>
-                        {source.name}
-                      </div>
+                      {source.name}
                     </TableCell>
                     <TableCell className="max-w-[250px] text-zinc-400 whitespace-normal break-words">
                       <ExpandableText text={contentText} maxLength={40} />
                     </TableCell>
                     <TableCell className="text-zinc-400 capitalize">{source.category || 'General'}</TableCell>
                     <TableCell>
-                      <span className="inline-flex items-center gap-1 rounded-md bg-zinc-900 px-2 py-1 text-xs font-mono font-medium text-zinc-300 ring-1 ring-inset ring-zinc-700">
-                        {source.type}
-                      </span>
+                      <TypeChip label={source.type} />
                     </TableCell>
                     <TableCell>
-                      <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
-                        source.status === 'PUBLISHED' 
-                          ? 'bg-emerald-500/10 text-emerald-400 ring-1 ring-inset ring-emerald-500/20'
-                          : 'bg-yellow-500/10 text-yellow-400 ring-1 ring-inset ring-yellow-500/20'
-                      }`}>
-                        {source.status}
-                      </span>
+                      <StatusChip label={source.status} />
                     </TableCell>
                     <TableCell className="text-right">
                       <Link href={`/dashboard/knowledge/${source.id}`}>

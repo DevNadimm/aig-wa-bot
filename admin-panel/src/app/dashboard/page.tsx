@@ -133,7 +133,7 @@ export default async function DashboardOverview() {
             </Link>
           </CardHeader>
           <CardContent className="p-0">
-            <Table>
+            <Table withBorder={false}>
               <TableHeader>
                 <TableRow className="border-zinc-800/50 hover:bg-transparent">
                   <TableHead className="text-zinc-400 pl-6">Customer</TableHead>

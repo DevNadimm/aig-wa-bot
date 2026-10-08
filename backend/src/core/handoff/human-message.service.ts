@@ -60,6 +60,27 @@ export async function sendHumanMessage(
         throw new Error('Customer has no phone or whatsapp_lid');
     }
 
+    // Fetch agent name
+    let agentName: string | undefined;
+    if (agentId && (actorType === ActorType.AGENT || actorType === ActorType.ADMIN)) {
+        const { data: agentData } = await supabase
+            .from('human_agents')
+            .select('name')
+            .eq('id', agentId)
+            .single();
+        if (agentData) {
+            agentName = agentData.name;
+        }
+    }
+
+    // Determine sender type string
+    let senderTypeStr = 'HUMAN_AGENT';
+    if (actorType === ActorType.ADMIN) {
+        senderTypeStr = 'ADMIN';
+    } else if (actorType === ActorType.SYSTEM) {
+        senderTypeStr = 'SYSTEM';
+    }
+
     // 4. Send WhatsApp message
     let whatsappMessageId: string | undefined;
     try {
@@ -67,7 +88,8 @@ export async function sendHumanMessage(
             remoteJid,
             content,
             conversationId,
-            'HUMAN_AGENT'
+            senderTypeStr,
+            agentName
         );
     } catch (error) {
         logger.error({ event: 'SEND_WHATSAPP_MESSAGE_FAILED', error, conversationId });

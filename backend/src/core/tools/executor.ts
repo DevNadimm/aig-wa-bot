@@ -36,7 +36,7 @@ export function extractResponse(responseData: any, mapping: any): any {
   return responseData;
 }
 
-export async function executeExternalApi(url: string, method: string, headers: any, body?: any, timeoutMs: number = 60000): Promise<ToolExecutorResult> {
+export async function executeExternalApi(url: string, method: string, headers: any, body?: any, timeoutMs: number = 7000): Promise<ToolExecutorResult> {
   try {
     const parsedUrl = new URL(url);
     
@@ -74,7 +74,8 @@ export async function executeExternalApi(url: string, method: string, headers: a
     }
 
     // 2. Timeout Protection (Bounded max)
-    const boundedTimeout = Math.min(timeoutMs || 60000, 60000); 
+    // Strict timeout: cap at 10s max to prevent long hangs on slow 3rd-party APIs
+    const boundedTimeout = Math.min(timeoutMs || 7000, 10000); 
     const controller = new AbortController();
     const timeout = setTimeout(() => {
       controller.abort();
@@ -152,7 +153,7 @@ export async function executeIdempotentTool(
   url: string,
   headers: any,
   body: any,
-  timeoutMs: number = 60000,
+  timeoutMs: number = 7000,
   supportsIdempotency: boolean = false
 ): Promise<ToolExecutorResult> {
   const isSafeMethod = ["GET", "HEAD", "OPTIONS"].includes(method.toUpperCase());

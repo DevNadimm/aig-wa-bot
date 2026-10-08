@@ -72,8 +72,11 @@ CREATE TABLE ai_models (
     default_temperature DECIMAL(3,2) DEFAULT 0.7,
     default_max_tokens INTEGER DEFAULT 1024,
     is_active BOOLEAN DEFAULT true,
+    is_default BOOLEAN NOT NULL DEFAULT false,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+CREATE UNIQUE INDEX unique_default_per_provider ON ai_models(provider) WHERE is_default = true;
 
 CREATE TABLE ai_agents (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),

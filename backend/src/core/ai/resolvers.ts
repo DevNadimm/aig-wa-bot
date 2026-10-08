@@ -1,15 +1,24 @@
 import { configCache } from '../config/cache.js';
 import { logger } from '../../app.js';
 
+import { getBotConfig } from './llm_service.js';
+
 export class ModelResolver {
   async resolve(purpose: 'ROUTER' | 'WORKER' | 'FALLBACK', agentId?: string) {
+    const config = await getBotConfig();
+    const activeProvider = config.provider;
+    const models = configCache.getTable('ai_models');
+    
     if (purpose === 'WORKER' && agentId) {
       const agent = configCache.getRecord('ai_agents', agentId);
       if (agent && agent.model_id) {
         const model = configCache.getRecord('ai_models', agent.model_id);
         if (model && model.is_active) {
+          if (model.provider !== activeProvider) {
+            throw new Error(`Agent model configuration error: Agent uses a model from '${model.provider}' but the global active provider is '${activeProvider}'. Please update the agent's model in the Admin Panel.`);
+          }
           return {
-            name: model.name, // e.g. gemini-1.5-flash
+            name: model.name,
             temperature: agent.temperature || model.default_temperature || 0.7,
             maxTokens: agent.max_tokens || model.default_max_tokens || 1024,
           };
@@ -17,30 +26,18 @@ export class ModelResolver {
       }
     }
     
-    // Fallback or Router: prioritize 'flash' for routing to save tokens, otherwise pick first active
-    const models = configCache.getTable('ai_models');
-    logger.info(`Cached models for router: ${models.map(m => m.name).join(', ')}`);
+    // Fallback or Router: find the explicitly configured default model
+    const defaultModel = models.find(m => m.is_active && m.provider === activeProvider && m.is_default);
     
-    let fallbackModel;
-    if (purpose === 'ROUTER') {
-      fallbackModel = models.find(m => m.is_active && m.name.includes('flash'));
+    if (!defaultModel) {
+      throw new Error(`System model configuration error: No explicit default model configured for the global provider '${activeProvider}'. Please configure one in the database.`);
     }
-    
-    if (!fallbackModel) {
-      fallbackModel = models.find(m => m.is_active);
-    }
-    
-    if (fallbackModel) {
-      return {
-        name: fallbackModel.name,
-        temperature: fallbackModel.default_temperature || 0.7,
-        maxTokens: fallbackModel.default_max_tokens || 1024,
-      };
-    }
-    
-    // Ultimate failsafe
-    logger.warn(`ModelResolver: No active model found in DB for purpose ${purpose}. Falling back to gemini-3.5-flash-lite.`);
-    return { name: 'gemini-3.5-flash-lite', temperature: 0.7, maxTokens: 1024 };
+
+    return {
+      name: defaultModel.name,
+      temperature: defaultModel.default_temperature || 0.7,
+      maxTokens: defaultModel.default_max_tokens || 1024,
+    };
   }
 }
 
@@ -87,10 +84,27 @@ Respond with the identified intent slug and your confidence level (0.0 to 1.0).`
     }
 
     // Safe interpolation logic
-    return promptContent.replace(/\{\{([^}]+)\}\}/g, (match, key) => {
+    let finalPrompt = promptContent.replace(/\{\{([^}]+)\}\}/g, (match, key) => {
       const trimmedKey = key.trim();
       return variables[trimmedKey] !== undefined ? variables[trimmedKey] : match;
     });
+
+    if (type === 'AGENT') {
+      const waRules = `\n\nCRITICAL FORMATTING RULES FOR WHATSAPP:
+- NEVER use markdown tables (|---|). They look terrible on WhatsApp. Always use clean lists.
+- For lists, use simple numbers (1., 2.) or bullets (-). Do NOT use excessive emojis.
+- Use WhatsApp formatting: *bold* (single asterisk), _italics_ (underscores), ~strikethrough~ (tildes).
+- NEVER use standard markdown bold (**text**). NEVER use markdown headings (# Heading).
+- Keep text concise and easily readable on mobile screens.
+
+CRITICAL TOOL USAGE RULES:
+- If a tool requires parameters (like date, time, name, phone, etc.), you MUST ask the user for them if they haven't provided them yet.
+- NEVER invent, guess, or hallucinate missing parameters. 
+- NEVER call a tool with dummy data. Ask the user one or two questions at a time until you have all required information before calling the tool.`;
+      finalPrompt += waRules;
+    }
+
+    return finalPrompt;
   }
 }
 

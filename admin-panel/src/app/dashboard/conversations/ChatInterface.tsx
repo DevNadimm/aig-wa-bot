@@ -195,7 +195,7 @@ export function ChatInterface({ conversation, messages: initialMessages, current
       let stateChanged = false;
       if (localState === 'WAITING_HUMAN') {
         setLocalState('HUMAN_ACTIVE');
-        if (!isAdmin) setLocalAssignedAgentId(currentUserAgentId);
+        if (!(isAdmin || isAssignedAgent)) setLocalAssignedAgentId(currentUserAgentId);
         await changeConversationState(conversation.id, 'HUMAN_ACTIVE');
         stateChanged = true;
       }
@@ -214,7 +214,7 @@ export function ChatInterface({ conversation, messages: initialMessages, current
     try {
       setLocalState(newState); // Optimistic update
       if (newState === 'AI_ACTIVE') setLocalAssignedAgentId(null);
-      else if (newState === 'HUMAN_ACTIVE' && !isAdmin) setLocalAssignedAgentId(currentUserAgentId);
+      else if (newState === 'HUMAN_ACTIVE' && !(isAdmin || isAssignedAgent)) setLocalAssignedAgentId(currentUserAgentId);
       
       await changeConversationState(conversation.id, newState);
       router.refresh();
@@ -320,7 +320,7 @@ export function ChatInterface({ conversation, messages: initialMessages, current
             </div>
           )}
           {localState !== 'HUMAN_ACTIVE' ? (
-            isAdmin ? (
+            (isAdmin || isAssignedAgent) ? (
               <Button 
                 onClick={() => handleStateChange('HUMAN_ACTIVE')}
                 size="sm"
@@ -484,15 +484,15 @@ export function ChatInterface({ conversation, messages: initialMessages, current
         <form onSubmit={handleSend} className="flex items-center gap-2">
             <input 
               ref={inputRef}
-              disabled={localState === 'AI_ACTIVE' || (localState === 'HUMAN_ACTIVE' && !isAssignedAgent) || (localState === 'WAITING_HUMAN' && !isAdmin)}
+              disabled={localState === 'AI_ACTIVE' || (localState === 'HUMAN_ACTIVE' && !isAssignedAgent) || (localState === 'WAITING_HUMAN' && !(isAdmin || isAssignedAgent))}
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
-              placeholder={localState === 'AI_ACTIVE' ? "Take over to reply..." : (localState === 'WAITING_HUMAN' && !isAdmin) ? "Waiting for admin assignment..." : (localState === 'HUMAN_ACTIVE' && !isAssignedAgent) ? "Assigned to another agent" : "Type a message..."} 
+              placeholder={localState === 'AI_ACTIVE' ? "Take over to reply..." : (localState === 'WAITING_HUMAN' && !(isAdmin || isAssignedAgent)) ? "Waiting for admin assignment..." : (localState === 'HUMAN_ACTIVE' && !isAssignedAgent) ? "Assigned to another agent" : "Type a message..."} 
               className="flex-1 h-10 px-4 bg-[#121214] border border-zinc-800 rounded-full text-sm text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-indigo-500/50 focus:border-indigo-500/50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed" 
             />
             <button 
               type="submit" 
-              disabled={!inputText.trim() || isSending || localState === 'AI_ACTIVE' || (localState === 'HUMAN_ACTIVE' && !isAssignedAgent) || (localState === 'WAITING_HUMAN' && !isAdmin)}
+              disabled={!inputText.trim() || isSending || localState === 'AI_ACTIVE' || (localState === 'HUMAN_ACTIVE' && !isAssignedAgent) || (localState === 'WAITING_HUMAN' && !(isAdmin || isAssignedAgent))}
             className="h-10 w-10 shrink-0 rounded-full  shadow-indigo-900/30 disabled:bg-zinc-800 disabled:text-zinc-600 disabled:shadow-none flex items-center justify-center transition-all active:scale-95"
           >
             {isSending ? <Loading02Icon className="w-4 h-4 animate-spin" /> : <SentIcon className="w-4 h-4 ml-0.5" />}

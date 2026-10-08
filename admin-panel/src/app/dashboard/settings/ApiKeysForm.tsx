@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Key01Icon, FloppyDiskIcon, ViewIcon, ViewOffSlashIcon, PlusSignIcon, Delete01Icon } from "hugeicons-react";
+import { Key01Icon, FloppyDiskIcon, ViewIcon, ViewOffSlashIcon, PlusSignIcon, Delete01Icon, Link01Icon } from "hugeicons-react";
 import { updateApiKeys } from "./actions";
 
 // ── Provider configuration ────────────────────────────────────────────────────
@@ -179,15 +179,15 @@ export function ApiKeysForm({ bot }: { bot: any }) {
               <h3 className="text-sm font-medium text-zinc-200">{activeProvider.label} API Key(s)</h3>
             </div>
             <div className="flex items-center gap-2">
-              <a
-                href={activeProvider.docsUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors underline underline-offset-2"
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => window.open(activeProvider.docsUrl, '_blank')}
+                className="h-8 text-xs border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/10 hover:text-indigo-300"
               >
-                Get a free key →
-              </a>
-              <Button variant="outline" size="sm" onClick={handleAddKey} className="h-8 text-xs">
+                <Link01Icon className="w-3 h-3 mr-1" /> Get a free key
+              </Button>
+              <Button variant="secondary" size="sm" onClick={handleAddKey} className="h-8 text-xs">
                 <PlusSignIcon className="w-3 h-3 mr-1" /> Add Fallback
               </Button>
             </div>

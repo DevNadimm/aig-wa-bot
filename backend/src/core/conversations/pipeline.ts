@@ -4,7 +4,11 @@ import { supabase } from '../../config/supabase.js';
 import { executeWorkflow } from '../workflow/engine.js';
 import { configCache } from '../config/cache.js';
 
-const conversationLocks = new Set<string>();
+// Safety lock: prevents multiple AI pipeline executions for the same conversation.
+// The debounce layer (debounce.ts) handles rapid message batching,
+// but this lock is a safety net for edge cases (e.g., workflow resume + new message).
+const conversationLocks = new Map<string, number>(); // conversationId -> timestamp
+const LOCK_TIMEOUT_MS = 120_000; // 2-minute stale lock protection
 
 export async function processIncomingMessage(
   remoteJid: string, 
@@ -111,13 +115,20 @@ export async function processIncomingMessage(
   }
 
   // Check if AI is already processing this conversation
-  if (conversationLocks.has(conversationId)) {
-    logger.warn(`Conversation ${conversationId} is already being processed by AI. Skipping parallel execution.`);
-    return;
-  }
+    const lockTime = conversationLocks.get(conversationId);
+    if (lockTime) {
+      // Stale lock protection: if the lock has been held for too long, release it
+      if (Date.now() - lockTime > LOCK_TIMEOUT_MS) {
+        logger.warn({ event: 'stale_lock_released', conversationId }, `Stale lock released for ${conversationId} (held for ${Math.round((Date.now() - lockTime) / 1000)}s)`);
+        conversationLocks.delete(conversationId);
+      } else {
+        logger.warn(`Conversation ${conversationId} is already being processed by AI. Skipping parallel execution.`);
+        return;
+      }
+    }
 
   // Acquire execution lock
-  conversationLocks.add(conversationId);
+  conversationLocks.set(conversationId, Date.now());
 
   try {
     // Phase 6: Check for explicit customer human request BEFORE AI processing

@@ -1,3 +1,6 @@
+import { TypeChip } from "@/components/ui/type-chip";
+import { EmptyState } from "@/components/ui/empty-state";
+import { StatusChip } from "@/components/ui/status-chip";
 import { createClient } from"@/lib/supabase/server";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from"@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from"@/components/ui/table";
@@ -40,9 +43,7 @@ export default async function IntentsPage() {
           {error ? (
             <div className="text-red-500">Error loading intents: {error.message}</div>
           ) : !intents || intents.length === 0 ? (
-            <div className="text-center py-10 text-zinc-500">
-              No intents found. Create your first intent to get started.
-            </div>
+            <EmptyState title="No Intents Found" description="Create your first intent to get started." actionLabel="Create Intent" actionHref="/dashboard/intents/new" />
           ) : (
             <Table>
               <TableHeader>
@@ -59,21 +60,13 @@ export default async function IntentsPage() {
                   <TableRow key={intent.id} className="border-zinc-800/50 hover:bg-zinc-900/50">
                     <TableCell className="font-medium text-zinc-200">{intent.name}</TableCell>
                     <TableCell>
-                      <span className="inline-flex items-center rounded-md bg-zinc-900 px-2 py-1 text-xs font-mono font-medium text-zinc-300 ring-1 ring-inset ring-zinc-700">
-                        {intent.slug}
-                      </span>
+                      <TypeChip label={intent.slug} />
                     </TableCell>
                     <TableCell className="max-w-[400px] min-w-[200px] text-zinc-400 whitespace-normal break-words">
                       <ExpandableText text={intent.description} maxLength={50} />
                     </TableCell>
                     <TableCell>
-                      <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
-                        intent.status === 'ACTIVE' 
-                          ? 'bg-emerald-500/10 text-emerald-400 ring-1 ring-inset ring-emerald-500/20'
-                          : 'bg-yellow-500/10 text-yellow-400 ring-1 ring-inset ring-yellow-500/20'
-                      }`}>
-                        {intent.status}
-                      </span>
+                      <StatusChip label={intent.status} />
                     </TableCell>
                     <TableCell className="text-right">
                       <Link href={`/dashboard/intents/${intent.id}`}>

@@ -526,7 +526,7 @@ IMPORTANT INSTRUCTIONS:
   
   let aiReply = "";
   let isDone = false;
-  let maxLoops = 5;
+  const maxLoops = 3; // Reduced from 5 to prevent excessive token usage
   let loops = 0;
 
   const geminiTools = functionDeclarations.length > 0 ? [{ functionDeclarations }] : [];
@@ -631,7 +631,7 @@ IMPORTANT INSTRUCTIONS:
                             url,
                             headers,
                             body,
-                            apiConfig.timeout_ms || 60000,
+                            Math.min(apiConfig.timeout_ms || 7000, 10000),
                             method !== 'GET' // supportsIdempotency proxy flag
                         );
                         
@@ -684,6 +684,32 @@ IMPORTANT INSTRUCTIONS:
     } else {
       aiReply = "I'm having trouble generating a response.";
       isDone = true;
+    }
+  }
+
+  // If the AI exhausted its tool-call loop without producing a final reply,
+  // auto-handoff to a human agent instead of sending a generic error.
+  if (!isDone && loops >= maxLoops) {
+    logger.warn({ event: 'tool_loop_exhausted', conversationId, loops }, 'AI exhausted tool call limit. Auto-handoff triggered.');
+    try {
+      await updateConversationStateAtomic(conversationId, {
+        state: 'WAITING_HUMAN',
+        handoff_reason: 'AI_TOOL_LOOP_EXHAUSTED',
+        timeout_at: null,
+        timeout_action: null,
+      });
+      const systemMessages = configCache.getTable('system_messages');
+      const msg = systemMessages.find((m: { message_key: string }) => m.message_key === 'handoff_waiting');
+      await sendWhatsAppMessage(
+        remoteJid,
+        msg?.content || 'আমি আপনার অনুরোধটি সম্পূর্ণভাবে প্রক্রিয়া করতে পারছি না। আপনাকে একজন সাপোর্ট এজেন্টের সাথে সংযুক্ত করা হচ্ছে, অনুগ্রহ করে অপেক্ষা করুন।',
+        conversationId,
+        'SYSTEM'
+      );
+      return { type: 'HANDOFF' as const, reason: 'AI_TOOL_LOOP_EXHAUSTED' };
+    } catch (handoffErr) {
+      logger.error({ err: handoffErr }, 'Auto-handoff after loop exhaustion failed');
+      // Fall through to normal reply handling below
     }
   }
 
