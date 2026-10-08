@@ -1,5 +1,5 @@
 import { createApp, logger } from './app.js';
-import { initWhatsApp } from './core/whatsapp/connection.js';
+import { initializeWhatsAppOnStartup } from './core/whatsapp/connection.js';
 import { configCache } from './core/config/cache.js';
 
 import { ensureDefaultSetup } from './database/seed.js';
@@ -25,7 +25,7 @@ async function bootstrap() {
     }
 
     // Initialize WhatsApp Baileys connection
-    await initWhatsApp('main-bot');
+    await initializeWhatsAppOnStartup('main-bot');
 
     const { startTimeoutWorker } = await import('./core/workflow/timeout_worker.js');
     startTimeoutWorker();

@@ -30,6 +30,14 @@ export function createApp(): Express {
     res.json(connectionState);
   });
 
+  app.post('/api/whatsapp/connect', async (req: Request, res: Response) => {
+    const { initWhatsApp, connectionState } = await import('./core/whatsapp/connection.js');
+    connectionState.status = 'GENERATING_QR';
+    connectionState.qr = '';
+    initWhatsApp('main-bot');
+    res.json({ success: true, message: 'Generating QR code...' });
+  });
+
   app.post('/api/whatsapp/logout', async (req: Request, res: Response) => {
     const { getWhatsAppSocket } = await import('./core/whatsapp/sender.js');
     const sock = getWhatsAppSocket();

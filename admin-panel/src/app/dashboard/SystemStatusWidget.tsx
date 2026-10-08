@@ -26,10 +26,19 @@ export async function SystemStatusWidget() {
       const data = await res.json();
       if (data && data.status === 'CONNECTED') {
         waStatus = "Connected";
+      } else if (data && data.status === 'CONNECTING') {
+        waStatus = "Connecting...";
+      } else if (data && data.status === 'GENERATING_QR') {
+        waStatus = "Generating QR...";
       } else if (data && data.status === 'QR') {
         waStatus = "Waiting for Scan";
-      } else if (data && data.status === 'LOGGED_OUT') {
-        waStatus = "Logged Out";
+      } else if (data && data.status === 'DISCONNECTING') {
+        waStatus = "Disconnecting...";
+      } else if (data && data.status === 'DISCONNECTED') {
+        waStatus = "Disconnected";
+      } else if (data && ["CONNECTION_FAILED", "BANNED", "CONFLICT", "QR_TIMEOUT", "BAD_SESSION"].includes(data.status)) {
+        waStatus = data.status === "QR_TIMEOUT" ? "QR Expired" : 
+                   data.status === "CONFLICT" ? "Conflict" : "Error";
       } else {
         waStatus = "Disconnected";
       }
@@ -69,7 +78,7 @@ export async function SystemStatusWidget() {
 
 function StatusRow({ label, status }: { label: string; status: string }) {
   const isOnline = status ==="Online" || status ==="Connected";
-  const isWarning = status ==="Waiting for Scan" || status ==="Logged Out" || status ==="Connecting";
+  const isWarning = status ==="Waiting for Scan" || status ==="Generating QR..." || status ==="Connecting..." || status === "Disconnecting..." || status === "QR Expired" || status === "Conflict";
   
   let dotColor ="bg-red-500";
   let textColor ="text-red-400";

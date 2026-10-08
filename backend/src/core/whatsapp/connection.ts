@@ -44,6 +44,18 @@ const debouncer = new MessageDebouncer(async (merged: BufferedMessage) => {
   }
 }, DEBOUNCE_MS);
 
+export async function initializeWhatsAppOnStartup(sessionName: string = 'default') {
+  const fs = await import('fs');
+  const sessionPath = path.join(process.env.WHATSAPP_SESSION_PATH || './sessions', sessionName);
+  
+  if (fs.existsSync(sessionPath)) {
+    connectionState.status = 'CONNECTING';
+    await initWhatsApp(sessionName);
+  } else {
+    connectionState.status = 'DISCONNECTED';
+  }
+}
+
 export async function initWhatsApp(sessionName: string = 'default') {
   // Clear any pending reconnect timer
   if (reconnectTimer) {
@@ -95,28 +107,31 @@ export async function initWhatsApp(sessionName: string = 'default') {
 
     if (connection === 'close') {
       const statusCode = (lastDisconnect?.error as Boom)?.output?.statusCode;
-      const shouldReconnect = statusCode !== DisconnectReason.loggedOut;
-      
       logger.error({ statusCode }, 'WhatsApp connection closed');
       
-      if (shouldReconnect) {
+      let shouldReconnect = true;
+      let deleteSession = false;
+
+      if (statusCode === DisconnectReason.loggedOut) {
+        shouldReconnect = false;
+        deleteSession = true;
         connectionState.status = 'DISCONNECTED';
-        // Delay reconnection to avoid rapid-fire conflict loops
-        logger.info('Will reconnect in 5 seconds...');
-        reconnectTimer = setTimeout(() => {
-          initWhatsApp(sessionName);
-        }, 5000);
-      } else {
-        logger.warn('WhatsApp logged out. Clearing session and regenerating QR...');
-        connectionState.status = 'LOGGED_OUT';
-        connectionState.qr = '';
-        
-        await supabase
-          .from("whatsapp_sessions")
-          .update({ status: "DISCONNECTED", phone_number: null })
-          .eq("session_name", sessionName);
-          
-        // Clean up the session folder to force a fresh QR generation
+      } else if (statusCode === DisconnectReason.forbidden) {
+        shouldReconnect = false;
+        connectionState.status = 'BANNED';
+      } else if (statusCode === DisconnectReason.connectionReplaced) {
+        shouldReconnect = false;
+        connectionState.status = 'CONFLICT';
+      } else if (statusCode === DisconnectReason.timedOut && connectionState.status === 'QR') {
+        shouldReconnect = false;
+        connectionState.status = 'QR_TIMEOUT';
+      } else if (statusCode === DisconnectReason.badSession) {
+        shouldReconnect = false;
+        deleteSession = true;
+        connectionState.status = 'BAD_SESSION';
+      }
+
+      if (deleteSession) {
         try {
           const fs = await import('fs');
           const sessionPath = path.join(process.env.WHATSAPP_SESSION_PATH || './sessions', sessionName);
@@ -127,11 +142,38 @@ export async function initWhatsApp(sessionName: string = 'default') {
         } catch (err) {
           logger.error({ err }, 'Failed to clear session folder');
         }
+
+        await supabase
+          .from("whatsapp_sessions")
+          .update({ status: "DISCONNECTED", phone_number: null })
+          .eq("session_name", sessionName);
+          
+        connectionState.qr = '';
+      } else if (!shouldReconnect) {
+        await supabase
+          .from("whatsapp_sessions")
+          .update({ status: connectionState.status })
+          .eq("session_name", sessionName);
+      }
+
+      if (shouldReconnect) {
+        let reconnectDelay = 5000;
         
-        // Restart the connection to generate a new QR code immediately
-        setTimeout(() => {
+        // 515 is restartRequired, 428 is connectionClosed. Both are common and normal after a QR scan
+        if (statusCode === DisconnectReason.restartRequired || statusCode === DisconnectReason.connectionClosed) {
+          connectionState.status = 'CONNECTING';
+          reconnectDelay = 1000; // reconnect quickly after scan
+        } else {
+          connectionState.status = 'CONNECTION_FAILED'; // Real failures
+        }
+
+        logger.info(`Will reconnect in ${reconnectDelay}ms...`);
+        reconnectTimer = setTimeout(() => {
+          if (connectionState.status === 'CONNECTION_FAILED') {
+            connectionState.status = 'CONNECTING';
+          }
           initWhatsApp(sessionName);
-        }, 2000);
+        }, reconnectDelay);
       }
     } else if (connection === 'open') {
       logger.info('WhatsApp connection opened successfully!');
