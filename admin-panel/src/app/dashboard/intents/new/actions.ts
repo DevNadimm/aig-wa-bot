@@ -18,6 +18,8 @@ export async function createIntent(formData: FormData) {
   const slug = formData.get('slug') as string;
   const description = formData.get('description') as string;
   const status = formData.get('status') as string || 'ACTIVE';
+  const workflow_id = (formData.get('workflow_id') as string) || null;
+  const agent_id = (formData.get('agent_id') as string) || null;
 
   const { error } = await supabase
     .from('intents')
@@ -26,7 +28,9 @@ export async function createIntent(formData: FormData) {
       name,
       slug,
       description,
-      status
+      status,
+      workflow_id: workflow_id || null,
+      agent_id: agent_id || null,
     }]);
 
   if (error) {
