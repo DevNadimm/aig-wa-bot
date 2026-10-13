@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { WhatsappIcon, QrCodeIcon, Tick01Icon, AlertCircleIcon, Refresh01Icon, Plug01Icon } from "hugeicons-react";
-import { HugeiconsIcon } from "@/components/ui/hugeicons-icon";
+import { WhatsappIcon, QrCodeIcon, Tick01Icon, AlertCircleIcon, Refresh01Icon } from "hugeicons-react";
+import { HugeiconsIcon, UnplugIcon } from "@/components/ui/hugeicons-icon";
 import { QRCodeSVG } from 'qrcode.react';
 
 export function WhatsAppConnection({ session }: { session: any }) {
@@ -188,7 +188,7 @@ export function WhatsAppConnection({ session }: { session: any }) {
                   variant="outline" 
                   className="w-full border-red-500/20 text-red-400 hover:bg-red-500/10 hover:text-red-300"
                 >
-                  <Plug01Icon className="w-4 h-4 mr-2" /> Disconnect Bot
+                  <HugeiconsIcon icon={UnplugIcon} className="w-4 h-4 mr-2" /> Disconnect Bot
                 </Button>
               </div>
             ) : status === "DISCONNECTED" ? (
