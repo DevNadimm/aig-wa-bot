@@ -293,15 +293,15 @@ export default function ConfigureToolPage() {
               id="tool_type"
               value={toolType}
               onChange={(e) => setToolType(e.target.value)}
-              className="appearance-none w-full h-10 pl-3 pr-10 bg-[#0c0c0e] border border-zinc-800 text-zinc-100 rounded-lg focus:outline-none focus:border-indigo-500 text-sm bg-no-repeat"
+              className="appearance-none w-full h-10 pl-3 pr-10 bg-[#0c0c0e] dark:bg-input/30 border border-zinc-800 text-zinc-100 rounded-lg focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/20 text-sm bg-no-repeat transition-colors"
               style={{
                 backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2371717a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
                 backgroundPosition: "right 12px center",
                 backgroundSize: "16px",
               }}
             >
-              <option value="REST_API">REST API Endpoint</option>
-              <option value="FUNCTION">Internal Function</option>
+              <option value="REST_API" className="bg-[#111113] text-zinc-100">REST API Endpoint</option>
+              <option value="FUNCTION" className="bg-[#111113] text-zinc-100">Internal Function</option>
             </select>
           </div>
         </div>
@@ -333,7 +333,7 @@ export default function ConfigureToolPage() {
             <select
               value={method}
               onChange={(e) => setMethod(e.target.value)}
-              className="appearance-none h-10 px-3 pr-8 bg-[#0c0c0e] border border-zinc-800 text-zinc-100 rounded-lg sm:w-32 text-sm font-semibold focus:outline-none focus:border-indigo-500 bg-no-repeat"
+              className="appearance-none h-10 px-3 pr-8 bg-[#0c0c0e] dark:bg-input/30 border border-zinc-800 text-zinc-100 rounded-lg sm:w-32 text-sm font-semibold focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/20 bg-no-repeat transition-colors"
               style={{
                 backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2371717a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
                 backgroundPosition: "right 8px center",
@@ -341,7 +341,7 @@ export default function ConfigureToolPage() {
               }}
             >
               {HTTP_METHODS.map((m) => (
-                <option key={m} value={m}>
+                <option key={m} value={m} className="bg-[#111113] text-zinc-100 font-normal">
                   {m}
                 </option>
               ))}
@@ -479,18 +479,18 @@ export default function ConfigureToolPage() {
                       <select
                         value={param.param_type}
                         onChange={(e) => updateParam(index, "param_type", e.target.value)}
-                        className="appearance-none h-8 w-full pl-2.5 pr-7 bg-[#0c0c0e] border border-zinc-800 text-zinc-200 rounded-md text-xs focus:outline-none focus:border-indigo-500 bg-no-repeat"
+                        className="appearance-none h-8 w-full pl-2.5 pr-7 bg-[#0c0c0e] dark:bg-input/30 border border-zinc-800 text-zinc-100 font-mono rounded-lg text-xs focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/20 bg-no-repeat transition-colors"
                         style={{
                           backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2371717a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
                           backgroundPosition: "right 6px center",
                           backgroundSize: "14px",
                         }}
                       >
-                        <option value="string">string</option>
-                        <option value="number">number</option>
-                        <option value="boolean">boolean</option>
-                        <option value="array">array</option>
-                        <option value="object">object</option>
+                        <option value="string" className="bg-[#111113] text-zinc-100 font-mono">string</option>
+                        <option value="number" className="bg-[#111113] text-zinc-100 font-mono">number</option>
+                        <option value="boolean" className="bg-[#111113] text-zinc-100 font-mono">boolean</option>
+                        <option value="array" className="bg-[#111113] text-zinc-100 font-mono">array</option>
+                        <option value="object" className="bg-[#111113] text-zinc-100 font-mono">object</option>
                       </select>
                     </TableCell>
 
@@ -515,7 +515,7 @@ export default function ConfigureToolPage() {
                         value={param.description}
                         onChange={(e) => updateParam(index, "description", e.target.value)}
                         placeholder="Explain this parameter to the AI..."
-                        className="h-8 bg-[#0c0c0e] border-zinc-800 text-zinc-200 text-xs focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20"
+                        className="h-8 bg-[#0c0c0e] border-zinc-800 text-zinc-100 text-xs focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20"
                       />
                     </TableCell>
 

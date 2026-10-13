@@ -171,7 +171,7 @@ export function IntentForm({ intent, workflows = [], agents = [] }: IntentFormPr
                 <select
                   value={selectedWorkflowId}
                   onChange={(e) => setSelectedWorkflowId(e.target.value)}
-                  className="w-full appearance-none bg-[#0c0c0e] border border-zinc-800 text-zinc-100 h-10 rounded-md px-3 pr-9 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/20"
+                  className="w-full appearance-none bg-[#0c0c0e] dark:bg-input/30 border border-zinc-800 text-zinc-100 h-10 rounded-lg px-3 pr-9 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/20 transition-colors"
                 >
                   <option value="" className="bg-[#111113] text-zinc-400">-- Select a workflow --</option>
                   {workflows.map((w) => (
@@ -198,7 +198,7 @@ export function IntentForm({ intent, workflows = [], agents = [] }: IntentFormPr
                 <select
                   value={selectedAgentId}
                   onChange={(e) => setSelectedAgentId(e.target.value)}
-                  className="w-full appearance-none bg-[#0c0c0e] border border-zinc-800 text-zinc-100 h-10 rounded-md px-3 pr-9 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/20"
+                  className="w-full appearance-none bg-[#0c0c0e] dark:bg-input/30 border border-zinc-800 text-zinc-100 h-10 rounded-lg px-3 pr-9 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/20 transition-colors"
                 >
                   <option value="" className="bg-[#111113] text-zinc-400">-- Select an AI agent --</option>
                   {agents.map((a) => (
