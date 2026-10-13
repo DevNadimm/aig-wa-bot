@@ -1,6 +1,6 @@
 # AIG Hospital — WhatsApp Automation Seed Configuration Guide
 
-> **Project:** AIG WA BOT (Configuration-Driven Multi-Agent WhatsApp Automation)  
+> **Project:** AIG WA BOT (Configuration-Driven Multi-Agent WhatsApp Automation Platform)  
 > **Tenant / Deployment:** AIG Hospitals (Hyderabad) — Patient Assistance Center Bangladesh (PACB)  
 > **Modules Covered:** Doctor Discovery, Appointment Booking, Medical Visa Assistance, Treatment Cost Estimation, Regional Office Information, Smart Human Handoff.
 
@@ -14,14 +14,14 @@ Configure these agents in **Dashboard > AI Agents > Create Agent**:
 * **Name:** `AIG Main Assistant`
 * **Model:** `openai/gpt-oss-20b`
 * **Temperature:** `0.3`
-* **Language:** `English / Bengali`
+* **Language:** `english`
 * **Description:** Primary assistant for hospital inquiries, doctor discovery, consultation costs, and appointments.
 * **System Prompt:**
 ```text
 You are the primary AI Assistant for AIG Hospitals (Asian Institute of Gastroenterology, Hyderabad) - Patient Assistance Center Bangladesh (PACB).
 
 Your responsibilities:
-1. Provide accurate, welcoming, and professional assistance to patients and attendants in Bengali or English.
+1. Provide accurate, welcoming, and professional assistance to patients and attendants in English.
 2. Guide patients to the appropriate medical departments (e.g., Medical Gastroenterology, Surgical Gastroenterology, Hepatology/Liver Care, Medical Oncology, Cardiology).
 3. Provide OPD consultation schedules, estimated treatment/investigation costs, and hospital location guidelines based on your Knowledge Base.
 4. If a user wants to book an appointment or request a medical visa, guide them to complete the respective automated workflow.
@@ -38,7 +38,7 @@ STRICT MEDICAL GUARDRAILS:
 * **Name:** `Visa & Coordination Specialist`
 * **Model:** `openai/gpt-oss-20b`
 * **Temperature:** `0.2`
-* **Language:** `English / Bengali`
+* **Language:** `english`
 * **Description:** Specialist agent handling medical visa invitation letters, required travel documents, and Bangladesh desk inquiries.
 * **System Prompt:**
 ```text
@@ -47,8 +47,8 @@ You are the dedicated Medical Visa & Travel Coordinator for AIG Hospitals Hydera
 Your responsibilities:
 1. Explain the step-by-step procedure for obtaining an official AIG Medical Visa Invitation Letter.
 2. Outline the exact required documents:
-   - Clear passport copies of patient and up to two attendants (minimum 6 months validity).
-   - Recent doctor prescription/medical summary from a registered doctor in Bangladesh (within last 3 months).
+   - Clear passport copies of the patient and up to two attendants (minimum 6 months validity).
+   - Recent doctor prescription/medical summary from a registered doctor in Bangladesh (issued within the last 3 months).
    - Proposed date of arrival in Hyderabad.
 3. Assist patients with local Bangladesh desk addresses (Dhaka & Chittagong) for document submission and physical verification.
 4. Keep answers concise, bulleted, and easy to read on WhatsApp.
@@ -132,16 +132,16 @@ Configure these in **Dashboard > Workflows > Create Workflow**:
 * **Description:** Step-by-step patient intake workflow for appointment bookings.
 * **Steps:**
   1. **Step 1 (Ask Question):**
-     - Prompt: *"দয়া করে রোগীর পুরো নাম এবং বয়স লিখুন। (Please write the patient's full name and age.)"*
+     - Prompt: `Please provide the patient's full name and age.`
      - Variable Name: `patient_name_age`
   2. **Step 2 (Ask Question):**
-     - Prompt: *"কোন বিভাগের ডাক্তার বা কোন সুনির্দিষ্ট ডাক্তারকে দেখাতে চান? (Which department or doctor do you wish to consult?)"*
+     - Prompt: `Which department or specialist doctor would you like to consult?`
      - Variable Name: `preferred_doctor_dept`
   3. **Step 3 (Ask Question):**
-     - Prompt: *"আপনি কোন তারিখে বা সপ্তাহের কোন সময়ে উপস্থিত হতে চান? (Preferred appointment date?)"*
+     - Prompt: `What is your preferred appointment date or time window?`
      - Variable Name: `preferred_date`
   4. **Step 4 (Send Message):**
-     - Message: *"ধন্যবাদ! আপনার অ্যাপয়েন্টমেন্ট রিকোয়েস্টটি সিস্টেমে নথিবদ্ধ করা হয়েছে। আমাদের বাংলাদেশ পেশেন্ট অ্যাসিস্ট্যান্স টিম শীঘ্রই কনফার্মেশনের জন্য যোগাযোগ করবে।"*
+     - Message: `Thank you! Your appointment request has been recorded. Our Patient Assistance Team will contact you shortly with confirmation details.`
 
 ### Workflow 2: Medical Visa Assistance
 * **Name:** `Medical Visa Assistance`
@@ -149,12 +149,12 @@ Configure these in **Dashboard > Workflows > Create Workflow**:
 * **Description:** Collects passenger and attendant details for visa invitation letter processing.
 * **Steps:**
   1. **Step 1 (Send Message):**
-     - Message: *"AIG হাসপাতাল থেকে মেডিকেল ভিসা ইনভাইটেশন লেটার পেতে রোগীর পাসপোর্ট কপি ও সাম্প্রতিক প্রেসক্রিপশন প্রয়োজন।"*
+     - Message: `To issue an official AIG Hospital Medical Visa Invitation Letter, we require clear passport copies of the patient and attendant, along with a recent doctor's prescription.`
   2. **Step 2 (Ask Question):**
-     - Prompt: *"রোগীর সাথে কি কোনো অ্যাটেনডেন্ট (সহযাত্রী) যাবেন? থাকলে তাদের সংখ্যা ও পাসপোর্টের পুরো নাম উল্লেখ করুন।"*
+     - Prompt: `Will any attendants be accompanying the patient? If yes, please provide their number and full names as written on their passports.`
      - Variable Name: `attendant_details`
   3. **Step 3 (Send Message):**
-     - Message: *"আপনার তথ্য আমাদের ভিসা ডেস্কে ফরোয়ার্ড করা হয়েছে। প্রয়োজনীয় কাগজপত্র যাচাই করে ২৪ ঘণ্টার মধ্যে অফিসিয়াল ভিসা ইনভাইটেশন লেটার প্রস্তুত করা হবে।"*
+     - Message: `Thank you! Your information has been forwarded to our Visa Desk. Our coordinators will review your documents and prepare the official visa invitation letter within 24 hours.`
 
 ---
 
