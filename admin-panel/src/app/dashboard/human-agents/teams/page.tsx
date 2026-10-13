@@ -58,8 +58,17 @@ export default async function TeamsPage() {
                     <TableCell className="text-zinc-400">
                       {new Date(team.created_at).toLocaleDateString()}
                     </TableCell>
-                    <TableCell className="text-right space-x-2">
-                       <Link href={`/dashboard/human-agents/teams/${team.id}`}><Button variant="ghost" size="sm"><PencilEdit02Icon className="h-4 w-4 mr-2" /> Edit</Button></Link>
+                    <TableCell className="text-right">
+                      <Link href={`/dashboard/human-agents/teams/${team.id}`}>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 px-2.5 text-xs font-medium text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/70 border border-transparent hover:border-zinc-700/60 rounded-md transition-all duration-150 gap-1.5"
+                        >
+                          <PencilEdit02Icon className="h-3.5 w-3.5 text-zinc-400" />
+                          <span>Edit</span>
+                        </Button>
+                      </Link>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -84,9 +93,3 @@ export default async function TeamsPage() {
     </div>
   )
 }
-
-
-
-
-
-

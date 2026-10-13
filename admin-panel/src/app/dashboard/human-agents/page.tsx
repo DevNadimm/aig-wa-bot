@@ -66,7 +66,8 @@ export default async function HumanAgentsPage() {
                   <TableHead className="text-zinc-400">Email</TableHead>
                   <TableHead className="text-zinc-400">Skill / Team</TableHead>
                   <TableHead className="text-zinc-400">Status</TableHead>
-                  <TableHead className="text-zinc-400 text-right">Active Chats</TableHead><TableHead className="text-zinc-400 text-right">Actions</TableHead>
+                  <TableHead className="text-zinc-400 text-right">Active Chats</TableHead>
+                  <TableHead className="text-zinc-400 text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -84,7 +85,21 @@ export default async function HumanAgentsPage() {
                     <TableCell>
                       <StatusChip label={agent.status} />
                     </TableCell>
-                    <TableCell className="text-zinc-400 text-right font-medium"><span className="text-zinc-100">{activeCounts[agent.id] || 0}</span> <span className="text-zinc-600">/ {agent.max_concurrent_conversations || 10}</span></TableCell><TableCell className="text-right"><Link href={`/dashboard/human-agents/${agent.id}`}><Button variant="ghost" size="sm"><PencilEdit02Icon className="h-4 w-4 mr-2" /> Edit</Button></Link></TableCell>
+                    <TableCell className="text-zinc-400 text-right font-medium">
+                      <span className="text-zinc-100">{activeCounts[agent.id] || 0}</span> <span className="text-zinc-600">/ {agent.max_concurrent_conversations || 10}</span>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Link href={`/dashboard/human-agents/${agent.id}`}>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 px-2.5 text-xs font-medium text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/70 border border-transparent hover:border-zinc-700/60 rounded-md transition-all duration-150 gap-1.5"
+                        >
+                          <PencilEdit02Icon className="h-3.5 w-3.5 text-zinc-400" />
+                          <span>Edit</span>
+                        </Button>
+                      </Link>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -95,6 +110,3 @@ export default async function HumanAgentsPage() {
     </div>
   )
 }
-
-
-

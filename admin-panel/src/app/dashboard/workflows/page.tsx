@@ -1,13 +1,13 @@
 import { TypeChip } from "@/components/ui/type-chip";
 import { EmptyState } from "@/components/ui/empty-state";
 import { StatusChip } from "@/components/ui/status-chip";
-import { createClient } from"@/lib/supabase/server";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from"@/components/ui/card";
-import { Button } from"@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from"@/components/ui/table";
-import Link from"next/link";
+import { createClient } from "@/lib/supabase/server";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import Link from "next/link";
 import { AddCircleIcon, PencilEdit02Icon, Settings02Icon, GitMergeIcon } from "hugeicons-react";
-import { ExpandableText } from"../intents/ExpandableText";
+import { ExpandableText } from "../intents/ExpandableText";
 
 export default async function WorkflowsPage() {
   const supabase = await createClient();
@@ -66,8 +66,29 @@ export default async function WorkflowsPage() {
                     <TableCell>
                       <StatusChip label={workflow.status} />
                     </TableCell>
-                    <TableCell className="text-right space-x-2">
-                      <Link href={`/dashboard/workflows/${workflow.id}/edit`}><Button variant="ghost" size="sm"><PencilEdit02Icon className="h-4 w-4 mr-2" /> Edit</Button></Link><Link href={`/dashboard/workflows/${workflow.id}`}><Button variant="ghost" size="sm" className="text-indigo-400 hover:text-indigo-300 hover:bg-indigo-500/10"><GitMergeIcon className="h-4 w-4 mr-2" /> Builder</Button></Link>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-1.5">
+                        <Link href={`/dashboard/workflows/${workflow.id}/edit`}>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 px-2.5 text-xs font-medium text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/70 border border-transparent hover:border-zinc-700/60 rounded-md transition-all duration-150 gap-1.5"
+                          >
+                            <PencilEdit02Icon className="h-3.5 w-3.5 text-zinc-400" />
+                            <span>Edit</span>
+                          </Button>
+                        </Link>
+                        <Link href={`/dashboard/workflows/${workflow.id}`}>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 px-2.5 text-xs font-medium text-zinc-400 hover:text-indigo-300 hover:bg-indigo-500/10 border border-transparent hover:border-indigo-500/30 rounded-md transition-all duration-150 gap-1.5"
+                          >
+                            <GitMergeIcon className="h-3.5 w-3.5 text-zinc-400" />
+                            <span>Builder</span>
+                          </Button>
+                        </Link>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -79,10 +100,3 @@ export default async function WorkflowsPage() {
     </div>
   );
 }
-
-
-
-
-
-
-

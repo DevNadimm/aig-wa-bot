@@ -1,11 +1,11 @@
 import { TypeChip } from "@/components/ui/type-chip";
 import { EmptyState } from "@/components/ui/empty-state";
-import { createClient } from"@/lib/supabase/server";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from"@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from"@/components/ui/table";
-import Link from"next/link";
+import { createClient } from "@/lib/supabase/server";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import Link from "next/link";
 import { AddCircleIcon, PencilEdit02Icon, Settings02Icon, ToolsIcon } from "hugeicons-react";
-import { Button } from"@/components/ui/button";
+import { Button } from "@/components/ui/button";
 
 export default async function ToolsPage() {
   const supabase = await createClient();
@@ -64,14 +64,35 @@ export default async function ToolsPage() {
                     <TableCell>
                       <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
                         tool.is_enabled 
-                          ? 'bg-emerald-500/10 text-emerald-400 ring-1 ring-inset ring-emerald-500/20'
+                           ? 'bg-emerald-500/10 text-emerald-400 ring-1 ring-inset ring-emerald-500/20'
                           : 'bg-zinc-800 text-zinc-400 ring-1 ring-inset ring-zinc-700'
                       }`}>
                         {tool.is_enabled ? 'Active' : 'Disabled'}
                       </span>
                     </TableCell>
-                    <TableCell className="text-right space-x-2">
-                      <Link href={`/dashboard/tools/${tool.id}/edit`}><Button variant="ghost" size="sm"><PencilEdit02Icon className="h-4 w-4 mr-2" /> Edit</Button></Link><Link href={`/dashboard/tools/${tool.id}`}><Button variant="ghost" size="sm" className="text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10"><Settings02Icon className="h-4 w-4 mr-2" /> Configure</Button></Link>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-1.5">
+                        <Link href={`/dashboard/tools/${tool.id}/edit`}>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 px-2.5 text-xs font-medium text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/70 border border-transparent hover:border-zinc-700/60 rounded-md transition-all duration-150 gap-1.5"
+                          >
+                            <PencilEdit02Icon className="h-3.5 w-3.5 text-zinc-400" />
+                            <span>Edit</span>
+                          </Button>
+                        </Link>
+                        <Link href={`/dashboard/tools/${tool.id}`}>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 px-2.5 text-xs font-medium text-zinc-400 hover:text-emerald-300 hover:bg-emerald-500/10 border border-transparent hover:border-emerald-500/30 rounded-md transition-all duration-150 gap-1.5"
+                          >
+                            <Settings02Icon className="h-3.5 w-3.5 text-zinc-400" />
+                            <span>Configure</span>
+                          </Button>
+                        </Link>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -83,7 +104,3 @@ export default async function ToolsPage() {
     </div>
   );
 }
-
-
-
-
