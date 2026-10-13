@@ -16,6 +16,14 @@ import {
   Copy01Icon,
   CheckmarkCircle02Icon,
 } from "hugeicons-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { updateTool, deleteTool } from "../actions";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
@@ -435,43 +443,43 @@ export default function ConfigureToolPage() {
             </div>
           )}
 
-          {/* Parameters List or Empty State */}
-          {params.length === 0 ? (
-            <div className="flex flex-col items-center justify-center p-8 text-center border-2 border-dashed border-zinc-800 bg-[#0c0c0e]/50 rounded-xl">
-              <div className="w-10 h-10 bg-zinc-800/50 rounded-full flex items-center justify-center mb-2.5">
-                <AiMagicIcon className="w-4 h-4 text-zinc-500" />
-              </div>
-              <h3 className="text-sm font-medium text-zinc-200">No Parameters Configured</h3>
-              <p className="text-xs text-zinc-500 mt-1 max-w-sm">
-                Add parameters manually or paste a JSON body to auto-extract them.
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {params.map((param, index) => (
-                <div
-                  key={index}
-                  className="flex items-start gap-3 p-3 bg-[#0c0c0e] rounded-lg border border-zinc-800"
-                >
-                  <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 flex-1">
+          {/* Parameters Table */}
+          <Table withBorder={true}>
+            <TableHeader>
+              <TableRow className="border-zinc-800/50 hover:bg-transparent">
+                <TableHead className="text-zinc-400 font-medium text-xs w-[200px]">Parameter Name</TableHead>
+                <TableHead className="text-zinc-400 font-medium text-xs w-[130px]">Type</TableHead>
+                <TableHead className="text-zinc-400 font-medium text-xs w-[100px] text-center">Required</TableHead>
+                <TableHead className="text-zinc-400 font-medium text-xs">Description for AI Agent</TableHead>
+                <TableHead className="text-right text-zinc-400 font-medium text-xs w-[60px]">Action</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {params.length === 0 ? (
+                <TableRow className="border-zinc-800/50 hover:bg-transparent">
+                  <TableCell colSpan={5} className="py-8 text-center text-zinc-500 text-xs">
+                    No parameters configured. Click &quot;Add Parameter&quot; or use &quot;Auto-Detect from JSON&quot; above.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                params.map((param, index) => (
+                  <TableRow key={index} className="border-zinc-800/50 hover:bg-zinc-900/40">
                     {/* Name */}
-                    <div className="space-y-1">
-                      <Label className="text-[11px] text-zinc-400 font-medium">Name</Label>
+                    <TableCell className="p-2">
                       <Input
                         value={param.name}
                         onChange={(e) => updateParam(index, "name", e.target.value)}
                         placeholder="e.g. department"
                         className="h-8 bg-[#0c0c0e] border-zinc-800 text-zinc-100 font-mono text-xs focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20"
                       />
-                    </div>
+                    </TableCell>
 
                     {/* Type */}
-                    <div className="space-y-1">
-                      <Label className="text-[11px] text-zinc-400 font-medium">Type</Label>
+                    <TableCell className="p-2">
                       <select
                         value={param.param_type}
                         onChange={(e) => updateParam(index, "param_type", e.target.value)}
-                        className="flex h-8 w-full items-center rounded-md border border-zinc-800 bg-[#0c0c0e] px-2.5 text-xs text-zinc-200 focus:outline-none focus:border-indigo-500"
+                        className="h-8 w-full px-2.5 bg-[#0c0c0e] border border-zinc-800 text-zinc-200 rounded-md text-xs focus:outline-none focus:border-indigo-500"
                       >
                         <option value="string">string</option>
                         <option value="number">number</option>
@@ -479,54 +487,76 @@ export default function ConfigureToolPage() {
                         <option value="array">array</option>
                         <option value="object">object</option>
                       </select>
-                    </div>
+                    </TableCell>
+
+                    {/* Required */}
+                    <TableCell className="p-2 text-center">
+                      <button
+                        type="button"
+                        onClick={() => updateParam(index, "is_required", !param.is_required)}
+                        className={`px-2.5 py-1 rounded text-[11px] font-medium border transition-colors ${
+                          param.is_required
+                            ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20"
+                            : "bg-zinc-800/60 text-zinc-500 border-zinc-700/60 hover:text-zinc-400"
+                        }`}
+                      >
+                        {param.is_required ? "Required" : "Optional"}
+                      </button>
+                    </TableCell>
 
                     {/* Description */}
-                    <div className="space-y-1 col-span-2">
-                      <Label className="text-[11px] text-zinc-400 font-medium">Description for AI</Label>
+                    <TableCell className="p-2">
                       <Input
                         value={param.description}
                         onChange={(e) => updateParam(index, "description", e.target.value)}
                         placeholder="Explain this parameter to the AI..."
                         className="h-8 bg-[#0c0c0e] border-zinc-800 text-zinc-200 text-xs focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20"
                       />
-                    </div>
-                  </div>
+                    </TableCell>
 
-                  {/* Required + Delete */}
-                  <div className="flex flex-col items-center gap-1.5 pt-4 shrink-0">
-                    <button
-                      type="button"
-                      onClick={() => updateParam(index, "is_required", !param.is_required)}
-                      className={`px-2 py-0.5 rounded text-[10px] font-medium border transition-colors ${
-                        param.is_required
-                          ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                          : "bg-zinc-800/60 text-zinc-500 border-zinc-700/60 hover:text-zinc-400"
-                      }`}
-                    >
-                      {param.is_required ? "Required" : "Optional"}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => removeParam(index)}
-                      className="text-zinc-500 hover:text-red-400 p-1 transition-colors"
-                    >
-                      <Delete02Icon className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
-              ))}
+                    {/* Action */}
+                    <TableCell className="p-2 text-right">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => removeParam(index)}
+                        className="h-7 w-7 text-zinc-500 hover:text-red-400 hover:bg-red-500/10"
+                      >
+                        <Delete02Icon className="h-3.5 w-3.5" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
 
-              {/* Add Another */}
+          {/* Table Bottom Footer */}
+          <div className="flex items-center justify-between pt-1">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={addParam}
+              className="h-7 px-2.5 text-xs text-indigo-400 hover:text-indigo-300 hover:bg-zinc-800/60 gap-1.5"
+            >
+              <Add01Icon className="w-3.5 h-3.5" />
+              Add Another Parameter
+            </Button>
+
+            {params.length > 0 && (
               <button
                 type="button"
-                onClick={addParam}
-                className="w-full py-2.5 rounded-lg border border-dashed border-zinc-800 text-xs font-medium text-zinc-500 hover:text-zinc-300 hover:border-zinc-700 hover:bg-zinc-900/30 transition-colors"
+                onClick={() => {
+                  if (confirm("Clear all parameters?")) setParams([]);
+                }}
+                className="text-xs text-zinc-500 hover:text-red-400 transition-colors"
               >
-                + Add Another Parameter
+                Clear All
               </button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
         {/* AI Function Schema Preview Card (p-4 matching IntentForm card) */}
