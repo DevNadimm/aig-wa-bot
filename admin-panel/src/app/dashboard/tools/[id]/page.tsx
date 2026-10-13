@@ -532,31 +532,6 @@ export default function ConfigureToolPage() {
             </TableBody>
           </Table>
 
-          {/* Table Bottom Footer */}
-          <div className="flex items-center justify-between pt-1">
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={addParam}
-              className="h-7 px-2.5 text-xs text-indigo-400 hover:text-indigo-300 hover:bg-zinc-800/60 gap-1.5"
-            >
-              <Add01Icon className="w-3.5 h-3.5" />
-              Add Another Parameter
-            </Button>
-
-            {params.length > 0 && (
-              <button
-                type="button"
-                onClick={() => {
-                  if (confirm("Clear all parameters?")) setParams([]);
-                }}
-                className="text-xs text-zinc-500 hover:text-red-400 transition-colors"
-              >
-                Clear All
-              </button>
-            )}
-          </div>
         </div>
 
         {/* AI Function Schema Preview Card (p-4 matching IntentForm card) */}
