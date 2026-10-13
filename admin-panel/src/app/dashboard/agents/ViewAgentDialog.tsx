@@ -7,15 +7,17 @@ import { EyeIcon, Robot01Icon } from "hugeicons-react";
 export function ViewAgentDialog({ agent }: { agent: any }) {
   return (
     <Dialog>
-      <DialogTrigger asChild>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-7 px-2.5 text-xs font-medium text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/70 border border-transparent hover:border-zinc-700/60 rounded-md transition-all duration-150 gap-1.5"
-        >
-          <EyeIcon className="h-3.5 w-3.5 text-zinc-400" />
-          <span>View Details</span>
-        </Button>
+      <DialogTrigger
+        render={
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 px-2.5 text-xs font-medium text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/70 border border-transparent hover:border-zinc-700/60 rounded-md transition-all duration-150 gap-1.5"
+          />
+        }
+      >
+        <EyeIcon className="h-3.5 w-3.5 text-zinc-400" />
+        <span>View Details</span>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px] bg-[#0c0c0e] border-zinc-800 text-zinc-100">
         <DialogHeader>
