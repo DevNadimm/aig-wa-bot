@@ -43,6 +43,9 @@ export async function deleteWorkflow(formData: FormData) {
 
   const id = formData.get("id") as string
 
+  // Defensively nullify foreign key references in conversations
+  await supabase.from('conversations').update({ current_workflow_id: null }).eq('current_workflow_id', id);
+
   const { error } = await supabase
     .from('workflows')
     .delete()

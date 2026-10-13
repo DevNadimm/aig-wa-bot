@@ -37,6 +37,10 @@ export async function deleteIntent(formData: FormData) {
   const supabase = await createClient();
   const id = formData.get('id') as string;
 
+  // Defensively nullify foreign key references in conversations & leads
+  await supabase.from('conversations').update({ current_intent_id: null }).eq('current_intent_id', id);
+  await supabase.from('leads').update({ source_intent_id: null }).eq('source_intent_id', id);
+
   const { error } = await supabase
     .from('intents')
     .delete()
