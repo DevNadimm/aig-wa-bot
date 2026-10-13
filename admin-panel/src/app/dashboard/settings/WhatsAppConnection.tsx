@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { SmartPhone01Icon, QrCodeIcon, Tick01Icon, AlertCircleIcon, Refresh01Icon, Plug01Icon } from "hugeicons-react";
+import { WhatsappIcon, QrCodeIcon, Tick01Icon, AlertCircleIcon, Refresh01Icon, Plug01Icon } from "hugeicons-react";
+import { HugeiconsIcon } from "@/components/ui/hugeicons-icon";
 import { QRCodeSVG } from 'qrcode.react';
 
 export function WhatsAppConnection({ session }: { session: any }) {
@@ -147,7 +148,7 @@ export function WhatsAppConnection({ session }: { session: any }) {
     <Card className="border-zinc-800 bg-[#0c0c0e]">
       <CardHeader className="border-b border-zinc-800/50">
         <CardTitle className="text-lg text-zinc-100 flex items-center gap-2">
-          <SmartPhone01Icon className="w-5 h-5 text-indigo-400" /> WhatsApp Integration (Live)
+          <HugeiconsIcon icon={WhatsappIcon} className="w-5 h-5 text-emerald-400" /> WhatsApp Integration (Live)
         </CardTitle>
         <CardDescription className="text-zinc-400">
           Connect your organization's WhatsApp number using the real Baileys backend.
@@ -177,13 +178,13 @@ export function WhatsAppConnection({ session }: { session: any }) {
             {status === "CONNECTED" ? (
               <div className="text-center space-y-4">
                 <div className="w-16 h-16 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-2">
-                  <SmartPhone01Icon className="w-8 h-8 text-emerald-500" />
+                  <HugeiconsIcon icon={WhatsappIcon} className="w-8 h-8 text-emerald-500" />
                 </div>
                 <h3 className="text-zinc-200 font-medium">WhatsApp is Active</h3>
                 <p className="text-zinc-500 text-sm mb-4">Your AI bot is currently receiving and replying to messages.</p>
                 <Button 
                   onClick={handleDisconnect} 
-                  disabled={isDisconnecting || status === "DISCONNECTING"}
+                  disabled={isDisconnecting}
                   variant="outline" 
                   className="w-full border-red-500/20 text-red-400 hover:bg-red-500/10 hover:text-red-300"
                 >
