@@ -233,6 +233,11 @@ export default function ConfigureToolPage() {
         </div>
 
         <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 h-9 px-3 rounded-lg border border-zinc-800 bg-[#0c0c0e]">
+            <span className="text-xs font-medium text-zinc-400">Active</span>
+            <Switch checked={isEnabled} onCheckedChange={setIsEnabled} size="sm" />
+          </div>
+
           <Button
             type="button"
             variant="outline"
@@ -307,15 +312,6 @@ export default function ConfigureToolPage() {
             required
             className="bg-[#0c0c0e] border-zinc-800 text-zinc-100 font-sans text-sm leading-relaxed placeholder:text-zinc-600 focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20 resize-none"
           />
-        </div>
-
-        {/* Active Status Card matching ToolForm exactly (p-4) */}
-        <div className="flex items-center gap-4 p-4 rounded-xl border border-zinc-800 bg-[#0c0c0e]">
-          <div className="flex-1">
-            <h3 className="text-sm font-medium text-zinc-100">Active Status</h3>
-            <p className="text-sm text-zinc-500">Enable this tool to allow AI agents to execute it.</p>
-          </div>
-          <Switch checked={isEnabled} onCheckedChange={setIsEnabled} />
         </div>
 
         {/* API Endpoint Card (p-4 matching IntentForm card) */}
