@@ -12,7 +12,7 @@ Configure these agents in **Dashboard > AI Agents > Create Agent**:
 
 ### Agent 1: AIG Main Assistant
 * **Name:** `AIG Main Assistant`
-* **Model:** `gemini-3.8-flash`
+* **Model:** `openai/gpt-oss-20b`
 * **Temperature:** `0.3`
 * **Language:** `English / Bengali`
 * **Description:** Primary assistant for hospital inquiries, doctor discovery, consultation costs, and appointments.
@@ -36,7 +36,7 @@ STRICT MEDICAL GUARDRAILS:
 
 ### Agent 2: Visa & Coordination Specialist
 * **Name:** `Visa & Coordination Specialist`
-* **Model:** `gemini-3.8-flash`
+* **Model:** `openai/gpt-oss-20b`
 * **Temperature:** `0.2`
 * **Language:** `English / Bengali`
 * **Description:** Specialist agent handling medical visa invitation letters, required travel documents, and Bangladesh desk inquiries.
