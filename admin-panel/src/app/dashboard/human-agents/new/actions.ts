@@ -54,6 +54,11 @@ export async function createHumanAgent(formData: FormData) {
 
     if (authError) {
       console.error("Failed to auto-create auth user:", authError);
+      if (authError.message?.toLowerCase().includes("rate limit") && !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+        throw new Error(
+          "Supabase email rate limit exceeded! Please add SUPABASE_SERVICE_ROLE_KEY to your admin-panel/.env.local file so agents are created instantly via admin API without sending confirmation emails or hitting rate limits."
+        );
+      }
       throw new Error("Failed to auto-create Supabase User: " + authError.message);
     } else if (authData?.user) {
       finalAuthUserId = authData.user.id;
