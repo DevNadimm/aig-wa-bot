@@ -1,14 +1,14 @@
 import { TypeChip } from "@/components/ui/type-chip";
 import { EmptyState } from "@/components/ui/empty-state";
 import { StatusChip } from "@/components/ui/status-chip";
-import { createClient } from"@/lib/supabase/server";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from"@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from"@/components/ui/table";
-import { Button } from"@/components/ui/button";
-import Link from"next/link";
+import { createClient } from "@/lib/supabase/server";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 import { AddCircleIcon, PencilEdit02Icon } from "hugeicons-react";
 
-import { ExpandableText } from"./ExpandableText";
+import { ExpandableText } from "./ExpandableText";
 
 export default async function IntentsPage() {
   const supabase = await createClient();
@@ -70,8 +70,13 @@ export default async function IntentsPage() {
                     </TableCell>
                     <TableCell className="text-right">
                       <Link href={`/dashboard/intents/${intent.id}`}>
-                        <Button variant="ghost" size="sm">
-                          <PencilEdit02Icon className="h-4 w-4 mr-2" /> Edit
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-8 px-3 text-xs font-medium border-zinc-800 bg-zinc-900/60 hover:bg-indigo-500/10 hover:border-indigo-500/40 text-zinc-300 hover:text-indigo-200 transition-all duration-150 shadow-sm gap-1.5 rounded-lg group"
+                        >
+                          <PencilEdit02Icon className="h-3.5 w-3.5 text-zinc-400 group-hover:text-indigo-400 transition-colors" />
+                          <span>Edit</span>
                         </Button>
                       </Link>
                     </TableCell>
@@ -85,4 +90,3 @@ export default async function IntentsPage() {
     </div>
   );
 }
-
