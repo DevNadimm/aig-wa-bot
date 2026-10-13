@@ -18,7 +18,7 @@ export default async function KnowledgePage() {
       *,
       knowledge_documents(content)
     `)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false }).order("id", { ascending: true });
 
   return (
     <div className="space-y-6">
@@ -29,7 +29,7 @@ export default async function KnowledgePage() {
         </div>
         <Link href="/dashboard/knowledge/new">
           <Button>
-            <AddCircleIcon className="h-4 w-4" />
+            <AddCircleIcon className="mr-2 h-4 w-4" />
             Add Knowledge
           </Button>
         </Link>
@@ -93,3 +93,5 @@ export default async function KnowledgePage() {
     </div>
   );
 }
+
+

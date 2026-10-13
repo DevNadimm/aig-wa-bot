@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from"@/comp
 import { Button } from"@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from"@/components/ui/table";
 import Link from"next/link";
-import { AddCircleIcon, PencilEdit02Icon, Settings02Icon } from "hugeicons-react";
+import { AddCircleIcon, PencilEdit02Icon, Settings02Icon, GitMergeIcon } from "hugeicons-react";
 import { ExpandableText } from"../intents/ExpandableText";
 
 export default async function WorkflowsPage() {
@@ -15,7 +15,7 @@ export default async function WorkflowsPage() {
   const { data: workflows, error } = await supabase
     .from("workflows")
     .select("id, name, description, trigger_type, status, created_at")
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false }).order("id", { ascending: true });
 
   return (
     <div className="space-y-6">
@@ -26,7 +26,7 @@ export default async function WorkflowsPage() {
         </div>
         <Link href="/dashboard/workflows/new">
           <Button>
-            <AddCircleIcon className="h-4 w-4" />
+            <AddCircleIcon className="mr-2 h-4 w-4" />
             Create Workflow
           </Button>
         </Link>
@@ -66,12 +66,8 @@ export default async function WorkflowsPage() {
                     <TableCell>
                       <StatusChip label={workflow.status} />
                     </TableCell>
-                    <TableCell className="text-right">
-                      <Link href={`/dashboard/workflows/${workflow.id}`}>
-                        <Button variant="ghost" size="sm">
-                          <PencilEdit02Icon className="h-4 w-4 mr-2" /> Builder
-                        </Button>
-                      </Link>
+                    <TableCell className="text-right space-x-2">
+                      <Link href={`/dashboard/workflows/${workflow.id}/edit`}><Button variant="ghost" size="sm"><PencilEdit02Icon className="h-4 w-4 mr-2" /> Edit</Button></Link><Link href={`/dashboard/workflows/${workflow.id}`}><Button variant="ghost" size="sm" className="text-indigo-400 hover:text-indigo-300 hover:bg-indigo-500/10"><GitMergeIcon className="h-4 w-4 mr-2" /> Builder</Button></Link>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -83,3 +79,10 @@ export default async function WorkflowsPage() {
     </div>
   );
 }
+
+
+
+
+
+
+

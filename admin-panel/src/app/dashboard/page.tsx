@@ -132,13 +132,13 @@ export default async function DashboardOverview() {
               View all <ArrowUpRight01Icon className="w-3.5 h-3.5" />
             </Link>
           </CardHeader>
-          <CardContent className="p-0">
-            <Table withBorder={false}>
+          <CardContent>
+            <Table>
               <TableHeader>
                 <TableRow className="border-zinc-800/50 hover:bg-transparent">
-                  <TableHead className="text-zinc-400 pl-6">Customer</TableHead>
+                  <TableHead className="text-zinc-400">Customer</TableHead>
                   <TableHead className="text-zinc-400">Status</TableHead>
-                  <TableHead className="text-right text-zinc-400 pr-6">Last Active</TableHead>
+                  <TableHead className="text-right text-zinc-400">Last Active</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -171,7 +171,7 @@ export default async function DashboardOverview() {
                           {conv.state.replace('_', ' ')}
                         </span>
                       </TableCell>
-                      <TableCell className="text-right text-sm text-zinc-400 pr-6">
+                      <TableCell className="text-right text-sm text-zinc-400">
                         {conv.last_message_at ? formatDistanceToNow(new Date(conv.last_message_at), { addSuffix: true }) : 'Never'}
                       </TableCell>
                     </TableRow>

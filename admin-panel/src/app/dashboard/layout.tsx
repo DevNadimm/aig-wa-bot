@@ -43,7 +43,16 @@ export default async function DashboardLayout({ children }: { children: React.Re
     { name:"Workflows", href:"/dashboard/workflows", icon: GitMergeIcon, roles: ['admin'] },
     { name:"Tools & APIs", href:"/dashboard/tools", icon: ToolsIcon, roles: ['admin'] },
     { name:"Knowledge Base", href:"/dashboard/knowledge", icon: Database01Icon, roles: ['admin'] },
-    { name:"Team & Agents", href:"/dashboard/human-agents", icon: UserGroupIcon, roles: ['admin'] },
+    { 
+      name:"Team & Agents", 
+      href:"/dashboard/human-agents", 
+      icon: UserGroupIcon, 
+      roles: ['admin'],
+      subItems: [
+        { name: "Agents", href: "/dashboard/human-agents" },
+        { name: "Skills & Teams", href: "/dashboard/human-agents/teams" }
+      ]
+    },
     { name:"Settings", href:"/dashboard/settings", icon: Settings01Icon, roles: ['admin'] },
   ];
 
@@ -70,6 +79,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
                 href={item.href} 
                 name={item.name} 
                 icon={<item.icon className="h-4 w-4" />} 
+                subItems={item.subItems}
               />
             ))}
           </ul>

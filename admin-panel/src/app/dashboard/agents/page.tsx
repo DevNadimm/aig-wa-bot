@@ -26,7 +26,7 @@ export default async function AgentsPage() {
       created_at,
       ai_models(name)
     `)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false }).order("id", { ascending: true });
 
   return (
     <div className="space-y-6">
@@ -97,3 +97,4 @@ export default async function AgentsPage() {
     </div>
   );
 }
+

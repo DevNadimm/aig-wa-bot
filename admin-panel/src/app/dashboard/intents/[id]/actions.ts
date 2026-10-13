@@ -24,3 +24,20 @@ export async function updateIntent(id: string, formData: FormData) {
   revalidatePath('/dashboard/intents');
   redirect('/dashboard/intents');
 }
+export async function deleteIntent(formData: FormData) {
+  const supabase = await createClient();
+  const id = formData.get('id') as string;
+
+  const { error } = await supabase
+    .from('intents')
+    .delete()
+    .eq('id', id);
+
+  if (error) {
+    console.error('Error deleting intent:', error);
+    throw new Error(error.message);
+  }
+
+  revalidatePath('/dashboard/intents');
+  redirect('/dashboard/intents');
+}

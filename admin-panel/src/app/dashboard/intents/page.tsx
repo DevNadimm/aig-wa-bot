@@ -17,7 +17,7 @@ export default async function IntentsPage() {
   const { data: intents, error } = await supabase
     .from("intents")
     .select("id, name, slug, description, status, created_at")
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false }).order("id", { ascending: true });
 
   return (
     <div className="space-y-6">
@@ -85,3 +85,4 @@ export default async function IntentsPage() {
     </div>
   );
 }
+

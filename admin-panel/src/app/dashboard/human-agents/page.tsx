@@ -4,7 +4,7 @@ import { StatusChip } from "@/components/ui/status-chip";
 import { createClient } from "@/lib/supabase/server"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { UserGroupIcon, AddCircleIcon } from "hugeicons-react"
+import { UserGroupIcon, AddCircleIcon, PencilEdit02Icon } from "hugeicons-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 
@@ -12,7 +12,11 @@ export const dynamic = 'force-dynamic'
 
 export default async function HumanAgentsPage() {
   const supabase = await createClient()
-  const { data: agents, error } = await supabase.from('human_agents').select('*, agent_teams!human_agents_team_id_fkey(name)')
+  const { data: agents, error } = await supabase
+    .from('human_agents')
+    .select('*, agent_teams!human_agents_team_id_fkey(name)')
+    .order('created_at', { ascending: false })
+    .order('id', { ascending: true })
   
   if (error) console.error("Error fetching agents:", error);
 
@@ -62,7 +66,7 @@ export default async function HumanAgentsPage() {
                   <TableHead className="text-zinc-400">Email</TableHead>
                   <TableHead className="text-zinc-400">Skill / Team</TableHead>
                   <TableHead className="text-zinc-400">Status</TableHead>
-                  <TableHead className="text-zinc-400 text-right">Active Chats</TableHead>
+                  <TableHead className="text-zinc-400 text-right">Active Chats</TableHead><TableHead className="text-zinc-400 text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -80,9 +84,7 @@ export default async function HumanAgentsPage() {
                     <TableCell>
                       <StatusChip label={agent.status} />
                     </TableCell>
-                    <TableCell className="text-zinc-400 text-right font-medium">
-                      <span className="text-zinc-100">{activeCounts[agent.id] || 0}</span> <span className="text-zinc-600">/ {agent.max_concurrent_conversations || 10}</span>
-                    </TableCell>
+                    <TableCell className="text-zinc-400 text-right font-medium"><span className="text-zinc-100">{activeCounts[agent.id] || 0}</span> <span className="text-zinc-600">/ {agent.max_concurrent_conversations || 10}</span></TableCell><TableCell className="text-right"><Link href={`/dashboard/human-agents/${agent.id}`}><Button variant="ghost" size="sm"><PencilEdit02Icon className="h-4 w-4 mr-2" /> Edit</Button></Link></TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -93,3 +95,6 @@ export default async function HumanAgentsPage() {
     </div>
   )
 }
+
+
+

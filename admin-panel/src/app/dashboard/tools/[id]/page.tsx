@@ -45,9 +45,9 @@ export default function EditToolPage() {
 
     const formData = new FormData(e.currentTarget);
     const data = {
-      name: formData.get("name"),
-      description: formData.get("description"),
-      tool_type: formData.get("tool_type"),
+      name: tool.name,
+      description: tool.description,
+      tool_type: tool.tool_type,
       is_enabled: formData.get("is_enabled") ==="on",
       configuration: {
         method: formData.get("method"),
@@ -88,87 +88,14 @@ export default function EditToolPage() {
             </Button>
           </Link>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-zinc-100">Edit Tool</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-zinc-100">Configure Tool API</h1>
             <p className="text-zinc-400 text-sm mt-1">{tool.name}</p>
           </div>
         </div>
-        <Button onClick={handleDelete} variant="destructive" size="sm">
-          Delete Tool
-        </Button>
+        
       </div>
 
       <form onSubmit={onSubmit}>
-        <Card className="border-zinc-800 bg-[#0c0c0e]">
-          <CardHeader className="border-b border-zinc-800/50 pb-6">
-            <CardTitle className="text-lg text-zinc-100">Tool Details</CardTitle>
-            <CardDescription className="text-zinc-400">
-              Basic information and API configuration.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-8 pt-6">
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="col-span-1">
-                <Label htmlFor="name" className="text-zinc-200 font-medium text-sm">Tool Name</Label>
-                <p className="text-zinc-500 text-sm mt-1">Must be lowercase, no spaces (use underscores).</p>
-              </div>
-              <div className="col-span-2">
-                <Input id="name" name="name" defaultValue={tool.name} required className="bg-[#121214] border-zinc-700 text-zinc-100" />
-              </div>
-            </div>
-
-            <hr className="border-zinc-800/50" />
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="col-span-1">
-                <Label htmlFor="tool_type" className="text-zinc-200 font-medium text-sm">Tool Type</Label>
-                <p className="text-zinc-500 text-sm mt-1">What kind of tool is this?</p>
-              </div>
-              <div className="col-span-2">
-                <select 
-                  id="tool_type" 
-                  name="tool_type" 
-                  defaultValue={tool.tool_type}
-                  className="w-full h-10 px-3 py-2 bg-[#121214] border border-zinc-700 text-zinc-100 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 text-sm"
-                >
-                  <option value="REST_API">REST API</option>
-                </select>
-              </div>
-            </div>
-
-            <hr className="border-zinc-800/50" />
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="col-span-1">
-                <Label htmlFor="description" className="text-zinc-200 font-medium text-sm">Description</Label>
-                <p className="text-zinc-500 text-sm mt-1">Explain to the AI when and how to use this tool.</p>
-              </div>
-              <div className="col-span-2">
-                <Textarea 
-                  id="description" 
-                  name="description" 
-                  defaultValue={tool.description}
-                  rows={4} 
-                  required 
-                  className="bg-[#121214] border-zinc-700 text-zinc-100 resize-none"
-                />
-              </div>
-            </div>
-
-            <hr className="border-zinc-800/50" />
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="col-span-1">
-                <Label className="text-zinc-200 font-medium text-sm">Active Status</Label>
-                <p className="text-zinc-500 text-sm mt-1">Enable this tool to allow AI to use it immediately.</p>
-              </div>
-              <div className="col-span-2 flex items-center">
-                <Switch name="is_enabled" defaultChecked={tool.is_enabled} />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
         <Card className="border-zinc-800 bg-[#0c0c0e] mt-6">
           <CardHeader className="border-b border-zinc-800/50 pb-6">
             <CardTitle className="text-lg text-zinc-100">API Configuration</CardTitle>
@@ -299,3 +226,6 @@ export default function EditToolPage() {
     </div>
   );
 }
+
+
+

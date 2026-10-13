@@ -13,7 +13,7 @@ export default async function ToolsPage() {
   const { data: tools, error } = await supabase
     .from("tools")
     .select("*")
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false }).order("id", { ascending: true });
 
   return (
     <div className="space-y-6">
@@ -24,7 +24,7 @@ export default async function ToolsPage() {
         </div>
         <Link href="/dashboard/tools/new">
           <Button>
-            <AddCircleIcon className="h-4 w-4" />
+            <AddCircleIcon className="mr-2 h-4 w-4" />
             Create Tool
           </Button>
         </Link>
@@ -70,12 +70,8 @@ export default async function ToolsPage() {
                         {tool.is_enabled ? 'Active' : 'Disabled'}
                       </span>
                     </TableCell>
-                    <TableCell className="text-right">
-                      <Link href={`/dashboard/tools/${tool.id}`}>
-                        <Button variant="ghost" size="sm">
-                          <Settings02Icon className="h-4 w-4 mr-2" /> Configure
-                        </Button>
-                      </Link>
+                    <TableCell className="text-right space-x-2">
+                      <Link href={`/dashboard/tools/${tool.id}/edit`}><Button variant="ghost" size="sm"><PencilEdit02Icon className="h-4 w-4 mr-2" /> Edit</Button></Link><Link href={`/dashboard/tools/${tool.id}`}><Button variant="ghost" size="sm" className="text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10"><Settings02Icon className="h-4 w-4 mr-2" /> Configure</Button></Link>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -87,3 +83,7 @@ export default async function ToolsPage() {
     </div>
   );
 }
+
+
+
+
