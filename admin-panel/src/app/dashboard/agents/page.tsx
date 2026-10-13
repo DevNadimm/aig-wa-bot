@@ -78,7 +78,7 @@ export default async function AgentsPage() {
                       <StatusChip label={agent.status} />
                     </TableCell>
                     <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-2">
+                      <div className="flex items-center justify-end gap-1.5">
                         <ViewAgentDialog agent={agent} />
                         <Link href={`/dashboard/agents/${agent.id}`}>
                           <Button

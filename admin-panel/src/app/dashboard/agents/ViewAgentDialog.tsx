@@ -1,13 +1,21 @@
 "use client";
 
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { EyeIcon, Robot01Icon } from "hugeicons-react";
 
 export function ViewAgentDialog({ agent }: { agent: any }) {
   return (
     <Dialog>
-      <DialogTrigger className="inline-flex h-7 items-center justify-center rounded-md px-2.5 text-xs font-medium text-zinc-400 transition-all duration-150 hover:bg-zinc-800/70 hover:text-zinc-100 border border-transparent hover:border-zinc-700/60 gap-1.5 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50">
-        <EyeIcon className="h-3.5 w-3.5 text-zinc-400" /> View Details
+      <DialogTrigger asChild>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-7 px-2.5 text-xs font-medium text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/70 border border-transparent hover:border-zinc-700/60 rounded-md transition-all duration-150 gap-1.5"
+        >
+          <EyeIcon className="h-3.5 w-3.5 text-zinc-400" />
+          <span>View Details</span>
+        </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px] bg-[#0c0c0e] border-zinc-800 text-zinc-100">
         <DialogHeader>
