@@ -116,7 +116,7 @@ export function IntentForm({ intent, workflows = [], agents = [] }: IntentFormPr
         <div className="space-y-4 rounded-xl border border-zinc-800 bg-[#0c0c0e] p-4">
           <div>
             <h3 className="text-sm font-medium text-zinc-100">Action when matched</h3>
-            <p className="text-sm text-zinc-500">Intent detect হলে কী করবে সেটা বেছে নাও।</p>
+            <p className="text-sm text-zinc-500">Choose what action to trigger when this intent is detected.</p>
           </div>
 
           {/* Action type selector */}
@@ -131,7 +131,7 @@ export function IntentForm({ intent, workflows = [], agents = [] }: IntentFormPr
               }`}
             >
               <span className="text-sm font-medium">No Action</span>
-              <span className="text-xs opacity-70">শুধু intent detect করবে</span>
+              <span className="text-xs opacity-70">Only classify intent without triggering actions</span>
             </button>
 
             <button
@@ -144,7 +144,7 @@ export function IntentForm({ intent, workflows = [], agents = [] }: IntentFormPr
               }`}
             >
               <span className="text-sm font-medium">Run Workflow</span>
-              <span className="text-xs opacity-70">একটি workflow execute করবে</span>
+              <span className="text-xs opacity-70">Execute an automated workflow</span>
             </button>
 
             <button
@@ -157,7 +157,7 @@ export function IntentForm({ intent, workflows = [], agents = [] }: IntentFormPr
               }`}
             >
               <span className="text-sm font-medium">Route to AI Agent</span>
-              <span className="text-xs opacity-70">একটি AI Agent এ route করবে</span>
+              <span className="text-xs opacity-70">Hand over to a specialized AI agent</span>
             </button>
           </div>
 
@@ -173,7 +173,7 @@ export function IntentForm({ intent, workflows = [], agents = [] }: IntentFormPr
                   onChange={(e) => setSelectedWorkflowId(e.target.value)}
                   className="w-full appearance-none bg-[#0c0c0e] border border-zinc-800 text-zinc-100 h-10 rounded-md px-3 pr-9 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/20"
                 >
-                  <option value="" className="bg-[#111113] text-zinc-400">-- Workflow বেছে নাও --</option>
+                  <option value="" className="bg-[#111113] text-zinc-400">-- Select a workflow --</option>
                   {workflows.map((w) => (
                     <option key={w.id} value={w.id} className="bg-[#111113]">{w.name}</option>
                   ))}
@@ -183,7 +183,7 @@ export function IntentForm({ intent, workflows = [], agents = [] }: IntentFormPr
                 </svg>
               </div>
               {workflows.length === 0 && (
-                <p className="text-xs text-amber-500/80">⚠ কোনো workflow তৈরি নেই। আগে একটি workflow তৈরি করো।</p>
+                <p className="text-xs text-amber-500/80">⚠ No workflows found. Please create a workflow first.</p>
               )}
             </div>
           )}
@@ -200,7 +200,7 @@ export function IntentForm({ intent, workflows = [], agents = [] }: IntentFormPr
                   onChange={(e) => setSelectedAgentId(e.target.value)}
                   className="w-full appearance-none bg-[#0c0c0e] border border-zinc-800 text-zinc-100 h-10 rounded-md px-3 pr-9 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/20"
                 >
-                  <option value="" className="bg-[#111113] text-zinc-400">-- AI Agent বেছে নাও --</option>
+                  <option value="" className="bg-[#111113] text-zinc-400">-- Select an AI agent --</option>
                   {agents.map((a) => (
                     <option key={a.id} value={a.id} className="bg-[#111113]">{a.name}</option>
                   ))}
@@ -210,7 +210,7 @@ export function IntentForm({ intent, workflows = [], agents = [] }: IntentFormPr
                 </svg>
               </div>
               {agents.length === 0 && (
-                <p className="text-xs text-amber-500/80">⚠ কোনো AI Agent তৈরি নেই। আগে একটি agent তৈরি করো।</p>
+                <p className="text-xs text-amber-500/80">⚠ No AI agents found. Please create an agent first.</p>
               )}
             </div>
           )}
