@@ -75,11 +75,11 @@ Configure these in **Dashboard > Team & Agents > Skills & Teams > Add Team / Ski
 
 Configure these in **Dashboard > Team & Agents > Add Agent**:
 
-| Name | Email | Assigned Team | Max Concurrent Chats |
-| :--- | :--- | :--- | :--- |
-| **Kazi Tanvir (Coordinator)** | `tanvir.pacb@aig.com` | Patient Coordination Desk | 10 |
-| **Nusrat Jahan (Visa Specialist)** | `visa.bangladesh@aig.com` | Medical Visa Team | 10 |
-| **AIG Dhaka Desk Manager** | `dhaka.office@aig.com` | Bangladesh Regional Desk | 15 |
+| Name | Email | Password | Assigned Team | Max Concurrent Chats |
+| :--- | :--- | :--- | :--- | :--- |
+| **Kazi Tanvir (Coordinator)** | `tanvir.pacb@aig.com` | `password` | Patient Coordination Desk | 10 |
+| **Nusrat Jahan (Visa Specialist)** | `visa.bangladesh@aig.com` | `password` | Medical Visa Team | 10 |
+| **AIG Dhaka Desk Manager** | `dhaka.office@aig.com` | `AigDhaka2026!` | Bangladesh Regional Desk | 15 |
 
 ---
 
