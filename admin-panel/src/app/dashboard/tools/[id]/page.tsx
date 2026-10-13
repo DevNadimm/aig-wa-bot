@@ -46,7 +46,7 @@ export default function ConfigureToolPage() {
   const [endpoint, setEndpoint] = useState("");
   const [params, setParams] = useState<ToolParam[]>([]);
 
-  // Auto-detect JSON
+  // Auto-detect JSON state
   const [jsonBodyInput, setJsonBodyInput] = useState("");
   const [showAutoDetect, setShowAutoDetect] = useState(false);
 
@@ -216,8 +216,8 @@ export default function ConfigureToolPage() {
     );
 
   return (
-    <div className="space-y-6 pb-12">
-      {/* ── Standard Page Header ── */}
+    <div className="space-y-6">
+      {/* ── Standard Page Header matching IntentForm / AgentForm ── */}
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-3">
           <Link href="/dashboard/tools">
@@ -253,28 +253,31 @@ export default function ConfigureToolPage() {
         </div>
       </div>
 
-      {/* ── Section 1: General ── */}
-      <div className="space-y-5 rounded-xl border border-zinc-800 bg-[#0c0c0e] p-6">
-        <div>
-          <h3 className="text-sm font-medium text-zinc-100">General Settings</h3>
-          <p className="text-sm text-zinc-500 mt-0.5">Tool identifier and prompt instruction for the AI agent.</p>
-        </div>
+      {/* ── Form matching exact IntentForm / ToolForm layout ── */}
+      <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }} className="space-y-6">
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        {/* Tool Name & Type grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <Label className="text-zinc-300 text-sm font-medium">
-              Tool Function Name <span className="text-red-500">*</span>
+            <Label htmlFor="name" className="text-zinc-300 text-sm font-medium">
+              Tool Name <span className="text-red-500">*</span>
             </Label>
             <Input
+              id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. search_doctors"
+              required
               className="bg-[#0c0c0e] border-zinc-800 text-zinc-100 h-10 font-mono text-sm placeholder:text-zinc-600 focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20"
             />
           </div>
+
           <div className="space-y-2">
-            <Label className="text-zinc-300 text-sm font-medium">Tool Type</Label>
+            <Label htmlFor="tool_type" className="text-zinc-300 text-sm font-medium">
+              Tool Type <span className="text-red-500">*</span>
+            </Label>
             <select
+              id="tool_type"
               value={toolType}
               onChange={(e) => setToolType(e.target.value)}
               className="appearance-none w-full h-10 pl-3 pr-10 bg-[#0c0c0e] border border-zinc-800 text-zinc-100 rounded-lg focus:outline-none focus:border-indigo-500 text-sm bg-no-repeat"
@@ -290,268 +293,277 @@ export default function ConfigureToolPage() {
           </div>
         </div>
 
+        {/* Description */}
         <div className="space-y-2">
-          <Label className="text-zinc-300 text-sm font-medium">
-            AI Instruction Description <span className="text-red-500">*</span>
+          <Label htmlFor="description" className="text-zinc-300 text-sm font-medium">
+            Description <span className="text-red-500">*</span>
           </Label>
           <Textarea
+            id="description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Explain to the AI when and how to use this tool..."
-            rows={3}
+            rows={4}
+            required
             className="bg-[#0c0c0e] border-zinc-800 text-zinc-100 font-sans text-sm leading-relaxed placeholder:text-zinc-600 focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20 resize-none"
           />
         </div>
 
-        <div className="flex items-center gap-4 pt-2 border-t border-zinc-800/50">
+        {/* Active Status Card matching ToolForm exactly (p-4) */}
+        <div className="flex items-center gap-4 p-4 rounded-xl border border-zinc-800 bg-[#0c0c0e]">
           <div className="flex-1">
-            <p className="text-sm font-medium text-zinc-200">Enable Tool</p>
-            <p className="text-xs text-zinc-500 mt-0.5">AI agents can only call active tools.</p>
+            <h3 className="text-sm font-medium text-zinc-100">Active Status</h3>
+            <p className="text-sm text-zinc-500">Enable this tool to allow AI agents to execute it.</p>
           </div>
           <Switch checked={isEnabled} onCheckedChange={setIsEnabled} />
         </div>
-      </div>
 
-      {/* ── Section 2: HTTP Request ── */}
-      <div className="space-y-5 rounded-xl border border-zinc-800 bg-[#0c0c0e] p-6">
-        <div>
-          <h3 className="text-sm font-medium text-zinc-100">HTTP Request</h3>
-          <p className="text-sm text-zinc-500 mt-0.5">
-            The API endpoint and method that receives parameter data from AI function calls.
-          </p>
-        </div>
-
-        <div className="flex flex-col sm:flex-row items-stretch gap-3">
-          <select
-            value={method}
-            onChange={(e) => setMethod(e.target.value)}
-            className="h-10 px-3 bg-[#0c0c0e] border border-zinc-800 text-zinc-100 rounded-lg sm:w-32 text-sm font-semibold focus:outline-none focus:border-indigo-500"
-          >
-            {HTTP_METHODS.map((m) => (
-              <option key={m} value={m}>
-                {m}
-              </option>
-            ))}
-          </select>
-          <Input
-            value={endpoint}
-            onChange={(e) => setEndpoint(e.target.value)}
-            placeholder="https://api.yourdomain.com/v1/resource"
-            className="flex-1 h-10 bg-[#0c0c0e] border-zinc-800 text-zinc-100 font-mono text-sm placeholder:text-zinc-600 focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20"
-          />
-        </div>
-      </div>
-
-      {/* ── Section 3: Parameters ── */}
-      <div className="space-y-5 rounded-xl border border-zinc-800 bg-[#0c0c0e] p-6">
-        <div className="flex items-center justify-between">
+        {/* API Endpoint Card (p-4 matching IntentForm card) */}
+        <div className="space-y-4 rounded-xl border border-zinc-800 bg-[#0c0c0e] p-4">
           <div>
-            <h3 className="text-sm font-medium text-zinc-100">Parameters</h3>
-            <p className="text-sm text-zinc-500 mt-0.5">
-              Define arguments the AI must provide when calling this tool.
-            </p>
+            <h3 className="text-sm font-medium text-zinc-100">API Endpoint</h3>
+            <p className="text-sm text-zinc-500">Specify the HTTP method and destination URL for this tool.</p>
           </div>
-          <div className="flex items-center gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setShowAutoDetect(!showAutoDetect)}
-              className={`gap-1.5 text-xs border-zinc-700 ${
-                showAutoDetect
-                  ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                  : "text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200"
-              }`}
+
+          <div className="flex flex-col sm:flex-row items-stretch gap-3">
+            <select
+              value={method}
+              onChange={(e) => setMethod(e.target.value)}
+              className="appearance-none h-10 px-3 pr-8 bg-[#0c0c0e] border border-zinc-800 text-zinc-100 rounded-lg sm:w-32 text-sm font-semibold focus:outline-none focus:border-indigo-500 bg-no-repeat"
+              style={{
+                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2371717a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
+                backgroundPosition: "right 8px center",
+                backgroundSize: "16px",
+              }}
             >
-              <AiMagicIcon className="h-3.5 w-3.5" />
-              Auto-Detect from JSON
-            </Button>
-            <Button
-              type="button"
-              onClick={addParam}
-              size="sm"
-              className="gap-1.5 text-xs bg-indigo-600 hover:bg-indigo-700 text-white"
-            >
-              <Add01Icon className="h-3.5 w-3.5" />
-              Add Parameter
-            </Button>
+              {HTTP_METHODS.map((m) => (
+                <option key={m} value={m}>
+                  {m}
+                </option>
+              ))}
+            </select>
+            <Input
+              value={endpoint}
+              onChange={(e) => setEndpoint(e.target.value)}
+              placeholder="https://api.yourdomain.com/v1/resource"
+              required
+              className="flex-1 h-10 bg-[#0c0c0e] border-zinc-800 text-zinc-100 font-mono text-sm placeholder:text-zinc-600 focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20"
+            />
           </div>
         </div>
 
-        {/* Auto-Detect Panel (collapsible) */}
-        {showAutoDetect && (
-          <div className="space-y-4 p-4 rounded-lg border border-dashed border-emerald-500/30 bg-emerald-500/5">
-            <div className="flex items-start gap-2.5">
-              <AiMagicIcon className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-              <div className="text-sm">
-                <p className="font-medium text-zinc-200">Paste your API request body</p>
-                <p className="text-zinc-400 text-xs mt-0.5">
-                  Every JSON key will be extracted as a parameter with its data type auto-detected.
-                </p>
-              </div>
+        {/* Parameters Card (p-4 matching IntentForm card) */}
+        <div className="space-y-4 rounded-xl border border-zinc-800 bg-[#0c0c0e] p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-medium text-zinc-100">Parameters</h3>
+              <p className="text-sm text-zinc-500">
+                Define arguments the AI must provide when calling this tool.
+              </p>
             </div>
-
-            <Textarea
-              value={jsonBodyInput}
-              onChange={(e) => setJsonBodyInput(e.target.value)}
-              placeholder={`{\n  "department": "Gastroenterology",\n  "symptom": "Abdominal pain",\n  "is_emergency": false,\n  "max_results": 5\n}`}
-              rows={7}
-              className="bg-[#0c0c0e] border-zinc-800 text-emerald-400/90 font-mono text-sm leading-relaxed focus-visible:border-emerald-500 resize-none"
-            />
-
-            <div className="flex items-center justify-end gap-2">
+            <div className="flex items-center gap-2">
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={() => {
-                  try {
-                    setJsonBodyInput(JSON.stringify(JSON.parse(jsonBodyInput), null, 2));
-                    toast.success("JSON formatted");
-                  } catch (e: any) {
-                    toast.error(`Invalid JSON: ${e.message}`);
-                  }
-                }}
-                className="text-xs border-zinc-700 text-zinc-400 hover:bg-zinc-800"
+                onClick={() => setShowAutoDetect(!showAutoDetect)}
+                className={`gap-1.5 text-xs border-zinc-700 h-8 ${
+                  showAutoDetect
+                    ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                    : "text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200"
+                }`}
               >
-                Format
+                <AiMagicIcon className="h-3.5 w-3.5" />
+                Auto-Detect from JSON
               </Button>
               <Button
                 type="button"
-                onClick={detectParametersFromJson}
+                onClick={addParam}
                 size="sm"
-                className="text-xs bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5"
+                className="gap-1.5 text-xs bg-indigo-600 hover:bg-indigo-700 text-white h-8"
               >
-                <AiMagicIcon className="w-3.5 h-3.5" />
-                Detect & Import Parameters
+                <Add01Icon className="h-3.5 w-3.5" />
+                Add Parameter
               </Button>
             </div>
           </div>
-        )}
 
-        {/* Parameters Table */}
-        {params.length === 0 ? (
-          <div className="flex flex-col items-center justify-center p-10 text-center border-2 border-dashed border-zinc-800 bg-[#0c0c0e]/50 rounded-xl">
-            <div className="w-12 h-12 bg-zinc-800/50 rounded-full flex items-center justify-center mb-3">
-              <AiMagicIcon className="w-5 h-5 text-zinc-500" />
-            </div>
-            <h3 className="text-sm font-medium text-zinc-200">No Parameters Configured</h3>
-            <p className="text-xs text-zinc-500 mt-1 max-w-sm">
-              Add parameters manually or paste a JSON body to auto-extract them.
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {params.map((param, index) => (
-              <div
-                key={index}
-                className="flex items-start gap-4 p-4 bg-[#0c0c0e] rounded-lg border border-zinc-800/50"
-              >
-                <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 flex-1">
-                  {/* Name */}
-                  <div className="space-y-1">
-                    <Label className="text-xs text-zinc-400">Name</Label>
-                    <Input
-                      value={param.name}
-                      onChange={(e) => updateParam(index, "name", e.target.value)}
-                      placeholder="e.g. department"
-                      className="h-9 bg-[#0c0c0e] border-zinc-800 text-zinc-100 font-mono text-sm focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20"
-                    />
-                  </div>
-
-                  {/* Type */}
-                  <div className="space-y-1">
-                    <Label className="text-xs text-zinc-400">Type</Label>
-                    <select
-                      value={param.param_type}
-                      onChange={(e) => updateParam(index, "param_type", e.target.value)}
-                      className="flex h-9 w-full items-center rounded-md border border-zinc-800 bg-[#0c0c0e] px-3 py-1 text-sm text-zinc-200 focus:outline-none focus:border-indigo-500"
-                    >
-                      <option value="string">string</option>
-                      <option value="number">number</option>
-                      <option value="boolean">boolean</option>
-                      <option value="array">array</option>
-                      <option value="object">object</option>
-                    </select>
-                  </div>
-
-                  {/* Description */}
-                  <div className="space-y-1 col-span-2">
-                    <Label className="text-xs text-zinc-400">Description</Label>
-                    <Input
-                      value={param.description}
-                      onChange={(e) => updateParam(index, "description", e.target.value)}
-                      placeholder="Explain this parameter to the AI..."
-                      className="h-9 bg-[#0c0c0e] border-zinc-800 text-zinc-200 text-sm focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20"
-                    />
-                  </div>
-                </div>
-
-                {/* Required + Delete */}
-                <div className="flex flex-col items-center gap-2 pt-5 shrink-0">
-                  <button
-                    type="button"
-                    onClick={() => updateParam(index, "is_required", !param.is_required)}
-                    className={`px-2 py-0.5 rounded text-[10px] font-medium border transition-colors ${
-                      param.is_required
-                        ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                        : "bg-zinc-800 text-zinc-400 border-zinc-700"
-                    }`}
-                  >
-                    {param.is_required ? "Required" : "Optional"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => removeParam(index)}
-                    className="text-zinc-500 hover:text-red-400 transition-colors"
-                  >
-                    <Delete02Icon className="w-4 h-4" />
-                  </button>
+          {/* Auto-Detect Panel (collapsible) */}
+          {showAutoDetect && (
+            <div className="space-y-3 p-3.5 rounded-lg border border-dashed border-emerald-500/30 bg-emerald-500/5">
+              <div className="flex items-start gap-2.5">
+                <AiMagicIcon className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                <div className="text-xs">
+                  <p className="font-medium text-zinc-200">Paste your API request body (JSON)</p>
+                  <p className="text-zinc-400 mt-0.5">
+                    Every JSON key will be extracted as a parameter with its data type auto-detected.
+                  </p>
                 </div>
               </div>
-            ))}
 
-            {/* Add Another */}
-            <button
-              type="button"
-              onClick={addParam}
-              className="w-full py-2.5 rounded-lg border border-dashed border-zinc-800 text-xs font-medium text-zinc-500 hover:text-zinc-300 hover:border-zinc-600 hover:bg-zinc-900/30 transition-colors"
-            >
-              + Add Another Parameter
-            </button>
-          </div>
-        )}
-      </div>
+              <Textarea
+                value={jsonBodyInput}
+                onChange={(e) => setJsonBodyInput(e.target.value)}
+                placeholder={`{\n  "department": "Gastroenterology",\n  "symptom": "Abdominal pain",\n  "is_emergency": false,\n  "max_results": 5\n}`}
+                rows={6}
+                className="bg-[#0c0c0e] border-zinc-800 text-emerald-400/90 font-mono text-xs leading-relaxed focus-visible:border-emerald-500 resize-none"
+              />
 
-      {/* ── Section 4: AI Function Schema Preview ── */}
-      <div className="space-y-4 rounded-xl border border-zinc-800 bg-[#0c0c0e] p-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-sm font-medium text-zinc-100">AI Function Schema Preview</h3>
-            <p className="text-sm text-zinc-500 mt-0.5">
-              The JSON definition sent to LLMs (OpenAI / Groq / Gemini) during function calling.
-            </p>
-          </div>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={handleCopySchema}
-            className="gap-1.5 text-xs border-zinc-700 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800"
-          >
-            {copiedSchema ? (
-              <CheckmarkCircle02Icon className="h-3.5 w-3.5 text-emerald-400" />
-            ) : (
-              <Copy01Icon className="h-3.5 w-3.5" />
-            )}
-            {copiedSchema ? "Copied" : "Copy Schema"}
-          </Button>
+              <div className="flex items-center justify-end gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    try {
+                      setJsonBodyInput(JSON.stringify(JSON.parse(jsonBodyInput), null, 2));
+                      toast.success("JSON formatted");
+                    } catch (e: any) {
+                      toast.error(`Invalid JSON: ${e.message}`);
+                    }
+                  }}
+                  className="h-7 text-xs border-zinc-700 text-zinc-400 hover:bg-zinc-800"
+                >
+                  Format
+                </Button>
+                <Button
+                  type="button"
+                  onClick={detectParametersFromJson}
+                  size="sm"
+                  className="h-7 text-xs bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5"
+                >
+                  <AiMagicIcon className="w-3.5 h-3.5" />
+                  Detect & Import Parameters
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Parameters List or Empty State */}
+          {params.length === 0 ? (
+            <div className="flex flex-col items-center justify-center p-8 text-center border-2 border-dashed border-zinc-800 bg-[#0c0c0e]/50 rounded-xl">
+              <div className="w-10 h-10 bg-zinc-800/50 rounded-full flex items-center justify-center mb-2.5">
+                <AiMagicIcon className="w-4 h-4 text-zinc-500" />
+              </div>
+              <h3 className="text-sm font-medium text-zinc-200">No Parameters Configured</h3>
+              <p className="text-xs text-zinc-500 mt-1 max-w-sm">
+                Add parameters manually or paste a JSON body to auto-extract them.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {params.map((param, index) => (
+                <div
+                  key={index}
+                  className="flex items-start gap-3 p-3 bg-[#0c0c0e] rounded-lg border border-zinc-800"
+                >
+                  <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 flex-1">
+                    {/* Name */}
+                    <div className="space-y-1">
+                      <Label className="text-[11px] text-zinc-400 font-medium">Name</Label>
+                      <Input
+                        value={param.name}
+                        onChange={(e) => updateParam(index, "name", e.target.value)}
+                        placeholder="e.g. department"
+                        className="h-8 bg-[#0c0c0e] border-zinc-800 text-zinc-100 font-mono text-xs focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20"
+                      />
+                    </div>
+
+                    {/* Type */}
+                    <div className="space-y-1">
+                      <Label className="text-[11px] text-zinc-400 font-medium">Type</Label>
+                      <select
+                        value={param.param_type}
+                        onChange={(e) => updateParam(index, "param_type", e.target.value)}
+                        className="flex h-8 w-full items-center rounded-md border border-zinc-800 bg-[#0c0c0e] px-2.5 text-xs text-zinc-200 focus:outline-none focus:border-indigo-500"
+                      >
+                        <option value="string">string</option>
+                        <option value="number">number</option>
+                        <option value="boolean">boolean</option>
+                        <option value="array">array</option>
+                        <option value="object">object</option>
+                      </select>
+                    </div>
+
+                    {/* Description */}
+                    <div className="space-y-1 col-span-2">
+                      <Label className="text-[11px] text-zinc-400 font-medium">Description for AI</Label>
+                      <Input
+                        value={param.description}
+                        onChange={(e) => updateParam(index, "description", e.target.value)}
+                        placeholder="Explain this parameter to the AI..."
+                        className="h-8 bg-[#0c0c0e] border-zinc-800 text-zinc-200 text-xs focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Required + Delete */}
+                  <div className="flex flex-col items-center gap-1.5 pt-4 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => updateParam(index, "is_required", !param.is_required)}
+                      className={`px-2 py-0.5 rounded text-[10px] font-medium border transition-colors ${
+                        param.is_required
+                          ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                          : "bg-zinc-800/60 text-zinc-500 border-zinc-700/60 hover:text-zinc-400"
+                      }`}
+                    >
+                      {param.is_required ? "Required" : "Optional"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => removeParam(index)}
+                      className="text-zinc-500 hover:text-red-400 p-1 transition-colors"
+                    >
+                      <Delete02Icon className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+
+              {/* Add Another */}
+              <button
+                type="button"
+                onClick={addParam}
+                className="w-full py-2.5 rounded-lg border border-dashed border-zinc-800 text-xs font-medium text-zinc-500 hover:text-zinc-300 hover:border-zinc-700 hover:bg-zinc-900/30 transition-colors"
+              >
+                + Add Another Parameter
+              </button>
+            </div>
+          )}
         </div>
 
-        <pre className="p-4 rounded-lg bg-zinc-900/50 border border-zinc-800/50 text-zinc-300 font-mono text-xs overflow-x-auto leading-relaxed max-h-72">
-          {JSON.stringify(generateJsonSchema(), null, 2)}
-        </pre>
-      </div>
+        {/* AI Function Schema Preview Card (p-4 matching IntentForm card) */}
+        <div className="space-y-4 rounded-xl border border-zinc-800 bg-[#0c0c0e] p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-medium text-zinc-100">AI Function Schema Preview</h3>
+              <p className="text-sm text-zinc-500">
+                JSON schema passed to AI models during function calling.
+              </p>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleCopySchema}
+              className="gap-1.5 text-xs border-zinc-700 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 h-8"
+            >
+              {copiedSchema ? (
+                <CheckmarkCircle02Icon className="h-3.5 w-3.5 text-emerald-400" />
+              ) : (
+                <Copy01Icon className="h-3.5 w-3.5" />
+              )}
+              {copiedSchema ? "Copied" : "Copy Schema"}
+            </Button>
+          </div>
+
+          <pre className="p-3.5 rounded-lg bg-[#08080a] border border-zinc-800 text-zinc-300 font-mono text-xs overflow-x-auto leading-relaxed max-h-60">
+            {JSON.stringify(generateJsonSchema(), null, 2)}
+          </pre>
+        </div>
+
+      </form>
     </div>
   );
 }
