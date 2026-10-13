@@ -233,8 +233,8 @@ export default function ConfigureToolPage() {
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 h-9 px-3 rounded-lg border border-zinc-800 bg-[#0c0c0e]">
-            <span className="text-xs font-medium text-zinc-400">Active</span>
+          <div className="flex items-center gap-2.5 h-9 px-3 rounded-lg border border-zinc-800 bg-[#0c0c0e]">
+            <span className="text-sm font-medium text-zinc-300">Active</span>
             <Switch checked={isEnabled} onCheckedChange={setIsEnabled} size="sm" />
           </div>
 
