@@ -2,7 +2,9 @@
 
 > **Project:** AIG WA BOT (Configuration-Driven Multi-Agent WhatsApp Automation Platform)  
 > **Tenant / Deployment:** AIG Hospitals (Hyderabad) — Patient Assistance Center Bangladesh (PACB)  
-> **Modules Covered:** Doctor Discovery, Appointment Booking, Medical Visa Assistance, Treatment Cost Estimation, Regional Office Information, Smart Human Handoff.
+> **Architecture Principle:**  
+> - **Tools & APIs:** For dynamic, real-time data (Doctor Rosters, Live OPD Schedules, Dynamic Treatment Cost Estimates, Appointment Registration).  
+> - **Knowledge Base:** For fixed, permanent organizational knowledge (Hospital Campus Logistics, Bangladesh PACB Desks, Medical Visa Regulations, In-Patient Policies, First Visit FAQs).
 
 ---
 
@@ -22,10 +24,11 @@ You are the primary AI Assistant for AIG Hospitals (Asian Institute of Gastroent
 
 Your responsibilities:
 1. Provide accurate, welcoming, and professional assistance to patients and attendants in English.
-2. Guide patients to the appropriate medical departments (e.g., Medical Gastroenterology, Surgical Gastroenterology, Hepatology/Liver Care, Medical Oncology, Cardiology).
-3. Provide OPD consultation schedules, estimated treatment/investigation costs, and hospital location guidelines based on your Knowledge Base.
-4. If a user wants to book an appointment or request a medical visa, guide them to complete the respective automated workflow.
-5. If a patient expresses urgent distress or explicitly requests human assistance, transfer them to a human coordinator.
+2. For Doctor Schedules and Availability: Call the `search_doctors` API tool to retrieve real-time specialist profiles and OPD timings.
+3. For Treatment and Procedure Costs: Call the `get_cost_estimate` API tool to provide up-to-date pricing quotes.
+4. For Hospital Logistics, Visa Guidelines, and Local Desk details: Refer to your Knowledge Base.
+5. If a user wants to book an appointment or request a medical visa, guide them to complete the respective automated workflow.
+6. If a patient expresses urgent distress or explicitly requests human assistance, transfer them to a human coordinator.
 
 STRICT MEDICAL GUARDRAILS:
 - You MUST NOT provide clinical prescriptions, drug dosages, or diagnostic medical opinions.
@@ -45,7 +48,7 @@ STRICT MEDICAL GUARDRAILS:
 You are the dedicated Medical Visa & Travel Coordinator for AIG Hospitals Hyderabad - Bangladesh Patient Assistance Center.
 
 Your responsibilities:
-1. Explain the step-by-step procedure for obtaining an official AIG Medical Visa Invitation Letter.
+1. Explain the step-by-step procedure for obtaining an official AIG Medical Visa Invitation Letter using Knowledge Base guidelines.
 2. Outline the exact required documents:
    - Clear passport copies of the patient and up to two attendants (minimum 6 months validity).
    - Recent doctor prescription/medical summary from a registered doctor in Bangladesh (issued within the last 3 months).
@@ -158,53 +161,66 @@ Configure these in **Dashboard > Workflows > Create Workflow**:
 
 ---
 
-## 6. Tools & APIs (`tools`)
+## 6. Tools & APIs (`tools`) — Dynamic Data Layer
 
 Configure these in **Dashboard > Tools & APIs > Create Tool**:
 
-| Tool Name | Tool Type | Description |
-| :--- | :--- | :--- |
-| **`search_doctors`** | `REST_API` | Searches AIG Hospital doctor directory by department, specialty, or condition and returns OPD consultation days and timings. |
-| **`book_appointment`** | `REST_API` | Submits validated patient appointment intake information to the hospital booking gateway. |
-| **`get_cost_estimate`** | `REST_API` | Fetches standard price estimates for procedures (Endoscopy, Colonoscopy, ERCP, FibroScan, Liver Biopsy). |
+> **Note:** Real-time, fluctuating data such as live doctor rosters, changing OPD days, and exact package cost estimates are delegated to APIs rather than static text.
+
+### Tool 1: `search_doctors`
+* **Name:** `search_doctors`
+* **Tool Type:** `REST_API`
+* **Description:** `Queries the live AIG Hospital physician directory by specialty, department, or doctor name. Returns active consultants, qualifications, OPD days, and chamber timings.`
+* **Input Parameters:**
+  - `department` (string, optional): e.g. "Gastroenterology", "Hepatology"
+  - `doctor_name` (string, optional): e.g. "Dr. Nageshwar Reddy"
+* **Status:** Enabled
+
+### Tool 2: `get_cost_estimate`
+* **Name:** `get_cost_estimate`
+* **Tool Type:** `REST_API`
+* **Description:** `Retrieves real-time official cost estimates for outpatient investigations, procedures (Endoscopy, Colonoscopy, ERCP, FibroScan), surgeries, and room packages.`
+* **Input Parameters:**
+  - `procedure_name` (string): e.g. "Endoscopy", "Colonoscopy", "OPD Consultation"
+* **Status:** Enabled
+
+### Tool 3: `book_appointment`
+* **Name:** `book_appointment`
+* **Tool Type:** `REST_API`
+* **Description:** `Submits verified patient appointment intake details directly to the hospital scheduling gateway.`
+* **Input Parameters:**
+  - `patient_name` (string)
+  - `doctor_id` (string)
+  - `preferred_date` (string)
+* **Status:** Enabled
 
 ---
 
-## 7. Knowledge Base (`knowledge_sources` & `knowledge_documents`)
+## 7. Knowledge Base (`knowledge_sources`) — Fixed Static Knowledge
 
 Configure these in **Dashboard > Knowledge Base > Add Knowledge**:
 
-### Source 1: Doctor Roster & Specialties
-* **Name:** `AIG Specialist Doctors & Departments`
-* **Category:** `Doctors`
+> **Note:** Only fixed, stable hospital policies, office locations, visa guidelines, and travel logistics are stored here.
+
+### Source 1: Hospital Campus & Location Guidelines
+* **Name:** `AIG Campus Location & Travel Logistics`
+* **Category:** `General`
 * **Type:** `TEXT`
 * **Content:**
 ```text
-AIG Hospitals (Gachibowli, Hyderabad) Leading Specialists:
+AIG Hospitals Main Campus Overview:
+- Full Name: Asian Institute of Gastroenterology (AIG Hospitals).
+- Main Address: 1-66/AIG/2 to 9, Mindspace Road, Gachibowli, Hyderabad, Telangana 500032, India.
+- Operating Hours: Outpatient Clinics (Monday - Saturday: 8:00 AM - 6:00 PM). Emergency & Trauma: 24/7.
 
-1. Dr. D. Nageshwar Reddy
-- Designation: Chairman & Chief of Gastroenterology
-- Expertise: Therapeutic Endoscopy, Advanced Pancreato-Biliary disorders, ERCP
-- OPD Schedule: Monday - Saturday (By prior appointment)
-
-2. Dr. Rupa Banerjee
-- Designation: Director, IBD Center
-- Expertise: Crohn's Disease, Ulcerative Colitis, Inflammatory Bowel Disease
-- OPD Schedule: Monday, Wednesday, Friday
-
-3. Dr. P. N. Rao
-- Designation: Chief of Hepatology & Liver Care
-- Expertise: Chronic Hepatitis, Liver Cirrhosis, Pre & Post Liver Transplant Care
-- OPD Schedule: Tuesday, Thursday, Saturday
-
-Consultation Charges:
-- General OPD Specialist: ₹1,000 INR
-- Senior Consultant / Chief: ₹1,500 INR
-- Follow-up within 7 days: Complimentary / Reduced fee
+Travel & Commute Details:
+- Distance from Rajiv Gandhi International Airport (HYD): Approximately 30 km (35-45 minutes via Outer Ring Road).
+- Pre-paid Taxi & Ride-sharing: Uber, Ola, and airport pre-paid taxis operate directly to AIG Hospitals Gachibowli.
+- Landmark: Near IKEA Hyderabad & Mindspace IT Park.
 ```
 
-### Source 2: Bangladesh PACB Information Desk
-* **Name:** `Patient Assistance Center Bangladesh (PACB)`
+### Source 2: Bangladesh PACB Information Desks
+* **Name:** `Bangladesh Patient Assistance Centers (PACB)`
 * **Category:** `General`
 * **Type:** `TEXT`
 * **Content:**
@@ -213,57 +229,99 @@ AIG Hospitals - Patient Assistance Center Bangladesh (PACB):
 
 Dhaka Regional Center:
 - Address: House #12, Road #4, Dhanmondi R/A, Dhaka-1205, Bangladesh.
-- Hours: Saturday - Thursday, 10:00 AM - 6:00 PM (Closed on Friday).
-- Services: Document verification, Medical Visa Invitation Letter collection, Tele-consultation booking.
+- Operating Hours: Saturday - Thursday, 10:00 AM - 6:00 PM (Closed on Friday).
+- In-person Services: Document verification, Medical Visa Invitation Letter collection, and appointment guidance.
 
-Chittagong Help Desk:
-- Address: GEC Circle, O.R. Nizam Road, Chittagong.
-- Hours: Sunday - Thursday, 10:00 AM - 5:00 PM.
+Chittagong Regional Help Desk:
+- Address: GEC Circle, O.R. Nizam Road, Chittagong, Bangladesh.
+- Operating Hours: Sunday - Thursday, 10:00 AM - 5:00 PM.
 
 Helplines:
-- Official WhatsApp: +880 1700-000000 / +880 1800-000000
-- Email: bangladesh.desk@aighospitals.com
+- Official WhatsApp / Contact: +880 1700-000000 / +880 1800-000000
+- Official Support Email: bangladesh.desk@aighospitals.com
 ```
 
-### Source 3: Treatment Cost Estimates & Payment Guidelines
-* **Name:** `Diagnostic & Procedure Cost Guide`
-* **Category:** `Billing`
+### Source 3: Indian Medical Visa & Attendant Protocol
+* **Name:** `Medical Visa Regulations & Checklist`
+* **Category:** `Visa`
 * **Type:** `TEXT`
 * **Content:**
 ```text
-AIG Hospitals Hyderabad Estimated Diagnostic & Procedure Costs (INR):
+Guidelines for Indian Medical Visa (MED) & Medical Attendant Visa (MED X):
 
-Common Diagnostics:
-- Outpatient Consultation: ₹1,000 - ₹1,500
-- Upper GI Endoscopy (Diagnostic): ₹3,500 - ₹5,500
-- Colonoscopy: ₹7,000 - ₹12,000
-- FibroScan (Liver stiffness): ₹4,000 - ₹6,000
-- Abdominal Ultrasound: ₹1,800 - ₹2,500
-- CT Scan (Abdomen with Contrast): ₹8,000 - ₹14,000
+Visa Invitation Letter Eligibility:
+1. Patient must hold a valid passport with at least 6 months validity from date of travel.
+2. Patient must provide a recent medical prescription/summary from a registered doctor in Bangladesh (issued within the last 3 months).
+3. Maximum 2 medical attendants (family members) are permitted per patient under MED X visa category.
 
-Advanced Procedures:
-- ERCP (Endoscopic Retrograde Cholangiopancreatography): ₹40,000 - ₹75,000
-- Endoscopic Ultrasound (EUS): ₹18,000 - ₹30,000
+Process:
+- Once documents are submitted via WhatsApp or the Bangladesh desk, AIG International Patient Care issues the official Visa Invitation Letter on hospital letterhead within 24 business hours.
+- This letter must be submitted along with the visa application at the nearest Indian Visa Application Center (IVAC).
+```
 
-Payment Policy:
-- Accepted: International Credit/Debit Cards (Visa/Mastercard), Wire Transfer (SWIFT), Cash in INR or USD.
-- Note: Foreign exchange facilitation desk is available in the main hospital lobby.
+### Source 4: In-Patient Facilities & International Patient Services
+* **Name:** `Hospital Amenities & International Patient Support`
+* **Category:** `Facilities`
+* **Type:** `TEXT`
+* **Content:**
+```text
+AIG Hospitals International Patient Services:
+
+1. Language Assistance:
+- Multilingual patient coordinators fluent in Bengali, Hindi, and English are present at the International Patient Lounge to assist Bangladeshi patients throughout their visit.
+
+2. Financial & Currency Services:
+- Authorized Foreign Exchange (Forex) counter available on the ground floor for INR conversion (USD, BDT).
+- International Credit and Debit Cards (Visa, MasterCard, American Express) are accepted at all billing counters.
+
+3. Accommodation & Food:
+- Dedicated international cafeteria serving hygienic meals suitable for international diets.
+- Numerous budget hotels and serviced guest houses within 1 km walking distance of the hospital in Gachibowli.
+```
+
+### Source 5: First Visit Preparation Checklist
+* **Name:** `First Consultation Patient Checklist`
+* **Category:** `Preparation`
+* **Type:** `TEXT`
+* **Content:**
+```text
+Checklist for Your First Visit to AIG Hospitals:
+
+What to Bring:
+1. Original Passport, Indian Visa, and 2 passport-sized photographs.
+2. Complete historical medical files, previous discharge summaries, and prescriptions.
+3. Radiology CD/DVDs (CT Scan, MRI, Ultrasound) and original biopsy glass slides/blocks (if applicable).
+
+Preparation Advice:
+- Fasting: For routine abdominal ultrasound, endoscopy, or morning blood tests, please arrive with 8 hours of overnight fasting (water is usually permitted unless instructed otherwise).
 ```
 
 ---
 
-## 8. Summary of Workflow Execution Flow
+## 8. Summary of Dynamic vs Static Flow
 
 ```text
-[WhatsApp User Message]
-         │
-         ▼
-[Router Agent] ─── Classifies Intent
-         │
-         ├─── "doctor_information"  ──► [AIG Main Assistant] ──► Reads Knowledge Base ──► Answers User
-         ├─── "doctor_appointment"  ──► [Book Doctor Appointment Workflow] ──► Collects Name/Date ──► Saves Lead
-         ├─── "medical_visa"        ──► [Medical Visa Assistance Workflow] ──► Checklist & Attendant info
-         ├─── "cost_estimation"     ──► [AIG Main Assistant] ──► Returns procedure costs
-         ├─── "bangladesh_office"   ──► [AIG Main Assistant] ──► Shares Dhaka/Ctg desk addresses
-         └─── "human_handoff"       ──► [Handoff Engine] ──► Assigns Human Coordinator in Admin Panel
+                                [WhatsApp User Message]
+                                           │
+                                           ▼
+                                    [Router Agent]
+                                           │
+                 ┌─────────────────────────┴────────────────────────┐
+                 ▼                                                  ▼
+     [Dynamic Intent / Query]                           [Fixed Information Intent]
+   (Doctors, Costs, Booking)                          (Location, Visa Rules, Desks)
+                 │                                                  │
+                 ▼                                                  ▼
+        [Tools & APIs Layer]                            [Knowledge Base Layer]
+  - search_doctors (Live API)                      - Campus Address & Airport Route
+  - get_cost_estimate (Live API)                   - Bangladesh Dhaka/Ctg Desks
+  - book_appointment (Booking Engine)              - Medical Visa & Attendant Rules
+                 │                                 - Amenities & Bengali Translators
+                 │                                                  │
+                 └─────────────────────────┬────────────────────────┘
+                                           ▼
+                            [AIG Main Assistant Response]
+                                           │
+                                           ▼
+                                 [WhatsApp User Reply]
 ```
