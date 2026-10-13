@@ -71,11 +71,11 @@ export default async function IntentsPage() {
                     <TableCell className="text-right">
                       <Link href={`/dashboard/intents/${intent.id}`}>
                         <Button
-                          variant="outline"
+                          variant="ghost"
                           size="sm"
-                          className="h-8 px-3 text-xs font-medium border-zinc-800 bg-zinc-900/60 hover:bg-indigo-500/10 hover:border-indigo-500/40 text-zinc-300 hover:text-indigo-200 transition-all duration-150 shadow-sm gap-1.5 rounded-lg group"
+                          className="h-7 px-2.5 text-xs font-medium text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/70 border border-transparent hover:border-zinc-700/60 rounded-md transition-all duration-150 gap-1.5"
                         >
-                          <PencilEdit02Icon className="h-3.5 w-3.5 text-zinc-400 group-hover:text-indigo-400 transition-colors" />
+                          <PencilEdit02Icon className="h-3.5 w-3.5 text-zinc-400" />
                           <span>Edit</span>
                         </Button>
                       </Link>
