@@ -29,14 +29,6 @@ interface ToolParam {
 
 const HTTP_METHODS = ["GET", "POST", "PUT", "DELETE", "PATCH"] as const;
 
-const METHOD_COLORS: Record<string, string> = {
-  GET: "bg-sky-500/10 text-sky-400 border-sky-500/20",
-  POST: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-  PUT: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-  DELETE: "bg-rose-500/10 text-rose-400 border-rose-500/20",
-  PATCH: "bg-purple-500/10 text-purple-400 border-purple-500/20",
-};
-
 export default function ConfigureToolPage() {
   const router = useRouter();
   const paramsHook = useParams();
@@ -234,15 +226,9 @@ export default function ConfigureToolPage() {
             </Button>
           </Link>
           <div>
-            <div className="flex items-center gap-2.5">
-              <h1 className="text-2xl font-bold tracking-tight text-zinc-100">
-                Configure Tool
-              </h1>
-              <span className={`px-2 py-0.5 text-[10px] font-semibold rounded-md border ${METHOD_COLORS[method] || METHOD_COLORS.POST}`}>
-                {method}
-              </span>
-            </div>
-            <p className="text-zinc-400 text-sm mt-0.5">{name || "Untitled tool"}</p>
+            <h1 className="text-2xl font-bold tracking-tight text-zinc-100">
+              Configure Tool
+            </h1>
           </div>
         </div>
 
