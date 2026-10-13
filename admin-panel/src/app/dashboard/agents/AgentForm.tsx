@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import Link from "next/link";
@@ -90,22 +91,16 @@ export function AgentForm({ agent, models, activeProvider }: { agent?: any, mode
           <div className="space-y-2">
             <Label htmlFor="model_id" className="text-zinc-300 text-sm font-medium">AI Model <span className="text-red-500">*</span></Label>
             {models && models.length > 0 ? (
-              <select 
+              <Select 
                 id="model_id" 
                 name="model_id" 
                 defaultValue={agent?.model_id}
-                className="appearance-none w-full h-10 pl-3 pr-10 bg-[#0c0c0e] dark:bg-input/30 border border-zinc-800 text-zinc-100 rounded-lg focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/20 text-sm bg-no-repeat transition-colors"
-                style={{
-                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2371717a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
-                  backgroundPosition: 'right 12px center',
-                  backgroundSize: '16px'
-                }}
                 required
               >
                 {models.map(model => (
-                  <option key={model.id} value={model.id} className="bg-[#111113] text-zinc-100">{model.name}</option>
+                  <option key={model.id} value={model.id}>{model.name}</option>
                 ))}
-              </select>
+              </Select>
             ) : (
               <div className="w-full h-10 px-3 bg-[#0c0c0e] border border-red-900/50 text-red-400 rounded-lg text-sm flex items-center">
                 No active models for &apos;{activeProvider}&apos;.
@@ -120,21 +115,15 @@ export function AgentForm({ agent, models, activeProvider }: { agent?: any, mode
 
           <div className="space-y-2">
             <Label htmlFor="language" className="text-zinc-300 text-sm font-medium">Language <span className="text-red-500">*</span></Label>
-            <select 
+            <Select 
               id="language" 
               name="language" 
               defaultValue={agent?.language || 'bangla'}
-              className="appearance-none w-full h-10 pl-3 pr-10 bg-[#0c0c0e] border border-zinc-800 text-zinc-100 rounded-lg focus:outline-none focus:border-indigo-500 text-sm bg-no-repeat"
-              style={{
-                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2371717a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
-                backgroundPosition: 'right 12px center',
-                backgroundSize: '16px'
-              }}
             >
               <option value="bangla">Bangla</option>
               <option value="english">English</option>
               <option value="mixed">Mixed (Auto-detect)</option>
-            </select>
+            </Select>
           </div>
         </div>
 

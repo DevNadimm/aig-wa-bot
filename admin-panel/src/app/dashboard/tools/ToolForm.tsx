@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
@@ -66,20 +67,14 @@ export function ToolForm({ tool }: { tool?: any }) {
 
           <div className="space-y-2">
             <Label htmlFor="tool_type" className="text-zinc-300 text-sm font-medium">Tool Type <span className="text-red-500">*</span></Label>
-            <select 
+            <Select 
               id="tool_type" 
               name="tool_type"
               defaultValue={tool?.tool_type || "REST_API"}
-              className="appearance-none w-full h-10 pl-3 pr-10 bg-[#0c0c0e] dark:bg-input/30 border border-zinc-800 text-zinc-100 rounded-lg focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/20 text-sm bg-no-repeat transition-colors"
-              style={{
-                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2371717a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
-                backgroundPosition: 'right 12px center',
-                backgroundSize: '16px'
-              }}
             >
-              <option value="REST_API" className="bg-[#111113] text-zinc-100">REST API Endpoint</option>
-              <option value="FUNCTION" className="bg-[#111113] text-zinc-100">Internal Function</option>
-            </select>
+              <option value="REST_API">REST API Endpoint</option>
+              <option value="FUNCTION">Internal Function</option>
+            </Select>
           </div>
         </div>
         

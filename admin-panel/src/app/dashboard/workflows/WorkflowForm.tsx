@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import Link from "next/link";
@@ -65,21 +66,15 @@ export function WorkflowForm({ workflow }: { workflow?: any }) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
             <Label htmlFor="trigger_type" className="text-zinc-300 text-sm font-medium">Trigger Type <span className="text-red-500">*</span></Label>
-            <select 
+            <Select 
               id="trigger_type" 
               name="trigger_type"
               defaultValue={workflow?.trigger_type || "INTENT"}
-              className="appearance-none w-full h-10 pl-3 pr-10 bg-[#0c0c0e] border border-zinc-800 text-zinc-100 rounded-lg focus:outline-none focus:border-indigo-500 text-sm bg-no-repeat"
-              style={{
-                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2371717a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
-                backgroundPosition: 'right 12px center',
-                backgroundSize: '16px'
-              }}
             >
               <option value="INTENT">Intent Matched</option>
               <option value="KEYWORD">Keyword Match</option>
               <option value="MANUAL">Manual / Agent</option>
-            </select>
+            </Select>
           </div>
 
           <div className="space-y-2">

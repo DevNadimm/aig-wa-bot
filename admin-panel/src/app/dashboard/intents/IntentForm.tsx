@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import Link from "next/link";
@@ -167,21 +168,15 @@ export function IntentForm({ intent, workflows = [], agents = [] }: IntentFormPr
               <Label className="text-zinc-300 text-sm font-medium">
                 Select Workflow <span className="text-red-500">*</span>
               </Label>
-              <div className="relative">
-                <select
-                  value={selectedWorkflowId}
-                  onChange={(e) => setSelectedWorkflowId(e.target.value)}
-                  className="w-full appearance-none bg-[#0c0c0e] dark:bg-input/30 border border-zinc-800 text-zinc-100 h-10 rounded-lg px-3 pr-9 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/20 transition-colors"
-                >
-                  <option value="" className="bg-[#111113] text-zinc-400">-- Select a workflow --</option>
-                  {workflows.map((w) => (
-                    <option key={w.id} value={w.id} className="bg-[#111113]">{w.name}</option>
-                  ))}
-                </select>
-                <svg className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
-                </svg>
-              </div>
+              <Select
+                value={selectedWorkflowId}
+                onChange={(e) => setSelectedWorkflowId(e.target.value)}
+              >
+                <option value="" className="text-zinc-400">-- Select a workflow --</option>
+                {workflows.map((w) => (
+                  <option key={w.id} value={w.id}>{w.name}</option>
+                ))}
+              </Select>
               {workflows.length === 0 && (
                 <p className="text-xs text-amber-500/80">⚠ No workflows found. Please create a workflow first.</p>
               )}
@@ -194,21 +189,15 @@ export function IntentForm({ intent, workflows = [], agents = [] }: IntentFormPr
               <Label className="text-zinc-300 text-sm font-medium">
                 Select AI Agent <span className="text-red-500">*</span>
               </Label>
-              <div className="relative">
-                <select
-                  value={selectedAgentId}
-                  onChange={(e) => setSelectedAgentId(e.target.value)}
-                  className="w-full appearance-none bg-[#0c0c0e] dark:bg-input/30 border border-zinc-800 text-zinc-100 h-10 rounded-lg px-3 pr-9 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/20 transition-colors"
-                >
-                  <option value="" className="bg-[#111113] text-zinc-400">-- Select an AI agent --</option>
-                  {agents.map((a) => (
-                    <option key={a.id} value={a.id} className="bg-[#111113]">{a.name}</option>
-                  ))}
-                </select>
-                <svg className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
-                </svg>
-              </div>
+              <Select
+                value={selectedAgentId}
+                onChange={(e) => setSelectedAgentId(e.target.value)}
+              >
+                <option value="" className="text-zinc-400">-- Select an AI agent --</option>
+                {agents.map((a) => (
+                  <option key={a.id} value={a.id}>{a.name}</option>
+                ))}
+              </Select>
               {agents.length === 0 && (
                 <p className="text-xs text-amber-500/80">⚠ No AI agents found. Please create an agent first.</p>
               )}
