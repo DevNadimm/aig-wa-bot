@@ -113,10 +113,10 @@ export function IntentForm({ intent, workflows = [], agents = [] }: IntentFormPr
         <input type="hidden" name="agent_id" value={actionType === "agent" ? selectedAgentId : ""} />
 
         {/* ── Action when matched ── */}
-        <div className="space-y-4 rounded-xl border border-zinc-800 bg-[#0c0c0e] p-5">
+        <div className="space-y-4 rounded-xl border border-zinc-800 bg-[#0c0c0e] p-4">
           <div>
-            <p className="text-zinc-200 text-sm font-semibold">Action when matched</p>
-            <p className="text-zinc-500 text-xs mt-0.5">Intent detect হলে কী করবে সেটা বেছে নাও</p>
+            <h3 className="text-sm font-medium text-zinc-100">Action when matched</h3>
+            <p className="text-sm text-zinc-500">Intent detect হলে কী করবে সেটা বেছে নাও।</p>
           </div>
 
           {/* Action type selector */}
