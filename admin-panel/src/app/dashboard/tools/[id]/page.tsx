@@ -479,7 +479,12 @@ export default function ConfigureToolPage() {
                       <select
                         value={param.param_type}
                         onChange={(e) => updateParam(index, "param_type", e.target.value)}
-                        className="h-8 w-full px-2.5 bg-[#0c0c0e] border border-zinc-800 text-zinc-200 rounded-md text-xs focus:outline-none focus:border-indigo-500"
+                        className="appearance-none h-8 w-full pl-2.5 pr-7 bg-[#0c0c0e] border border-zinc-800 text-zinc-200 rounded-md text-xs focus:outline-none focus:border-indigo-500 bg-no-repeat"
+                        style={{
+                          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2371717a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
+                          backgroundPosition: "right 6px center",
+                          backgroundSize: "14px",
+                        }}
                       >
                         <option value="string">string</option>
                         <option value="number">number</option>
