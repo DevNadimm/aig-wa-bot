@@ -86,7 +86,7 @@ export default async function ToolsPage() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="h-7 px-2.5 text-xs font-medium text-zinc-400 hover:text-emerald-300 hover:bg-emerald-500/10 border border-transparent hover:border-emerald-500/30 rounded-md transition-all duration-150 gap-1.5"
+                            className="h-7 px-2.5 text-xs font-medium text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/70 border border-transparent hover:border-zinc-700/60 rounded-md transition-all duration-150 gap-1.5"
                           >
                             <Settings02Icon className="h-3.5 w-3.5 text-zinc-400" />
                             <span>Configure</span>

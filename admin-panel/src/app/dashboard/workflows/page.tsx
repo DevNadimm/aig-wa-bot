@@ -82,7 +82,7 @@ export default async function WorkflowsPage() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="h-7 px-2.5 text-xs font-medium text-zinc-400 hover:text-indigo-300 hover:bg-indigo-500/10 border border-transparent hover:border-indigo-500/30 rounded-md transition-all duration-150 gap-1.5"
+                            className="h-7 px-2.5 text-xs font-medium text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/70 border border-transparent hover:border-zinc-700/60 rounded-md transition-all duration-150 gap-1.5"
                           >
                             <GitMergeIcon className="h-3.5 w-3.5 text-zinc-400" />
                             <span>Builder</span>
