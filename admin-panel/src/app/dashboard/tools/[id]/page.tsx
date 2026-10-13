@@ -273,8 +273,8 @@ export default function ConfigureToolPage() {
         {/* Tool Name & Type grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <Label htmlFor="name" className="text-zinc-300 text-sm font-medium">
-              Tool Name <span className="text-red-500">*</span>
+            <Label htmlFor="name" required>
+              Tool Name
             </Label>
             <Input
               id="name"
@@ -287,8 +287,8 @@ export default function ConfigureToolPage() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="tool_type" className="text-zinc-300 text-sm font-medium">
-              Tool Type <span className="text-red-500">*</span>
+            <Label htmlFor="tool_type" required>
+              Tool Type
             </Label>
             <Select
               id="tool_type"
@@ -303,8 +303,8 @@ export default function ConfigureToolPage() {
 
         {/* Description */}
         <div className="space-y-2">
-          <Label htmlFor="description" className="text-zinc-300 text-sm font-medium">
-            Description <span className="text-red-500">*</span>
+          <Label htmlFor="description" required>
+            Description
           </Label>
           <Textarea
             id="description"
