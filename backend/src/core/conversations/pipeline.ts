@@ -34,7 +34,7 @@ export async function processIncomingMessage(
 
   // Handle manual reset command from user
   const cmd = text.trim().toLowerCase();
-  if (!isFromMe && (cmd === 'reset' || cmd === 'restart' || cmd === '/reset' || cmd === '/restart')) {
+  if (!isFromMe && (cmd === 'reset' || cmd === 'restart' || cmd === '/reset' || cmd === '/restart' || cmd === 'cancel' || cmd === '/cancel' || cmd === 'stop')) {
     logger.info(`Received reset command from ${phone}. Refreshing active conversation.`);
     
     // Find active conversation
@@ -178,79 +178,6 @@ export async function processIncomingMessage(
       // Continue to normal AI processing if handoff detection fails
     }
 
-    // 2.5 Check if we need to resume a workflow (with intelligent interruption & digression handling)
-    if (conv.state === 'WAITING_INPUT' && conv.current_workflow_id && conv.current_step_id) {
-      const { classifyWorkflowInput } = await import('../workflow/interruption.js');
-      
-      const workflow = configCache.getRecord('workflows', conv.current_workflow_id);
-      const pendingStep = configCache.getRecord('workflow_steps', conv.current_step_id);
-      const pendingQuestion = pendingStep?.configuration?.question || 
-                              pendingStep?.configuration?.prompt || 
-                              "Please provide the requested information.";
-
-      let agentId: string | undefined = undefined;
-      if (conv.current_intent_id) {
-        const intent = configCache.getRecord('intents', conv.current_intent_id);
-        if (intent) agentId = intent.agent_id;
-      }
-      if (!agentId) {
-        const defaultAgent = configCache.getTable('ai_agents').find(a => a.status === 'ACTIVE');
-        if (defaultAgent) agentId = defaultAgent.id;
-      }
-
-      const classification = await classifyWorkflowInput(
-        text,
-        pendingQuestion,
-        workflow?.name || 'Assistance'
-      );
-
-      if (classification.type === 'ANSWER') {
-        logger.info(`Input classified as ANSWER for workflow ${conv.current_workflow_id} at step ${conv.current_step_id}. Resuming.`);
-        await executeWorkflow(conv.current_workflow_id, conversationId, remoteJid, text, agentId, conv.current_step_id, true);
-        return;
-      }
-
-      if (classification.type === 'CANCEL_OR_SWITCH') {
-        logger.info(`Input classified as CANCEL_OR_SWITCH during workflow ${conv.current_workflow_id}. Resetting active workflow.`);
-        
-        await supabase.from('conversations').update({
-          current_workflow_id: null,
-          current_step_id: null,
-          current_intent_id: null,
-          state: 'AI_ACTIVE'
-        }).eq('id', conversationId);
-
-        const isSimpleCancel = [
-          'cancel', 'stop', 'reset', '/cancel', '/reset', 'abort', 
-          'nevermind', 'never mind', 'exit', 'quit',
-          'বাতিল', 'বন্ধ কর', 'থামুন', 'ক্যানসেল'
-        ].includes(text.trim().toLowerCase());
-
-        if (isSimpleCancel) {
-          const { sendWhatsAppMessage } = await import('../whatsapp/sender.js');
-          await sendWhatsAppMessage(
-            remoteJid,
-            "আপনার বর্তমান অনুরোধটি বাতিল করা হয়েছে। আমি আপনাকে অন্য কীভাবে সাহায্য করতে পারি? (Your request has been cancelled. How else may I assist you?)",
-            conversationId
-          );
-          return;
-        }
-
-        // If the user requested another intent (e.g. "I want doctor appointment"),
-        // allow pipeline to fall through naturally to Intent Routing below.
-      }
-
-      if (classification.type === 'DIGRESSION_QUESTION') {
-        logger.info(`Input classified as DIGRESSION_QUESTION ("${text}"). Answering user query while keeping workflow paused.`);
-        
-        const continuationSuffix = `📌 *আপনার ${workflow?.name || 'অনুরোধ'}টি সম্পন্ন করতে:*\n_${pendingQuestion}_`;
-        
-        const { executeAiAgent } = await import('../workflow/engine.js');
-        await executeAiAgent({ configuration: {} }, conversationId, remoteJid, agentId, continuationSuffix);
-        return; // Workflow remains paused in WAITING_INPUT
-      }
-    }
-
     // 3. Intent Routing
     // Fetch recent history for context
     const { data: historyData } = await supabase
@@ -268,7 +195,68 @@ export async function processIncomingMessage(
     }
 
     const intentResult = await detectIntent(text, organizationId, recentHistoryStr);
-    logger.info(`Detected Intent: ${intentResult?.intent}`);
+    logger.info(`Detected Intent: ${intentResult?.intent} (confidence: ${intentResult?.confidence})`);
+
+    // 4. Workflow Digression & Resumption Handling
+    // If the conversation is currently waiting for input at a workflow step:
+    if (conv.state === 'WAITING_INPUT' && conv.current_workflow_id && conv.current_step_id) {
+      let activeIntentSlug: string | undefined = undefined;
+      if (conv.current_intent_id) {
+        const activeIntent = configCache.getRecord('intents', conv.current_intent_id);
+        activeIntentSlug = activeIntent?.slug;
+      }
+
+      // Check if user's input is an answer to the step or continuing the current intent
+      const isContinuingCurrentFlow = 
+        !intentResult || 
+        intentResult.intent === 'fallback' || 
+        intentResult.intent === activeIntentSlug;
+
+      if (isContinuingCurrentFlow) {
+        logger.info(`Resuming workflow ${conv.current_workflow_id} at step ${conv.current_step_id}`);
+        let agentId: string | undefined = undefined;
+        if (conv.current_intent_id) {
+          const intent = configCache.getRecord('intents', conv.current_intent_id);
+          if (intent) agentId = intent.agent_id;
+        }
+        await executeWorkflow(conv.current_workflow_id, conversationId, remoteJid, text, agentId, conv.current_step_id, true);
+        return;
+      }
+
+      // If user interrupted with a DIFFERENT recognized intent:
+      const newIntent = configCache.getTable('intents').find(i => i.slug === intentResult.intent && i.status === 'ACTIVE');
+
+      if (newIntent?.workflow_id) {
+        // Case A: User explicitly switched to a different workflow
+        logger.info(`Switching from workflow ${conv.current_workflow_id} to ${newIntent.workflow_id}`);
+        await supabase.from('conversations').update({
+          current_intent_id: newIntent.id,
+          current_workflow_id: newIntent.workflow_id,
+          current_step_id: null,
+          state: 'AI_ACTIVE'
+        }).eq('id', conversationId);
+        await executeWorkflow(newIntent.workflow_id, conversationId, remoteJid, text, newIntent.agent_id);
+        return;
+      }
+
+      if (newIntent?.agent_id && !newIntent.workflow_id) {
+        // Case B: Digression query — user asked an informational question handled by an AI Agent
+        logger.info(`Workflow digression: Answering with agent ${newIntent.agent_id} while workflow remains paused.`);
+        const workflow = configCache.getRecord('workflows', conv.current_workflow_id);
+        const pendingStep = configCache.getRecord('workflow_steps', conv.current_step_id);
+        const pendingQuestion = pendingStep?.configuration?.question || pendingStep?.configuration?.prompt;
+        
+        const reminder = pendingQuestion 
+          ? `📌 *আপনার ${workflow?.name || 'অনুরোধ'}টি এগিয়ে নিতে:*\n_${pendingQuestion}_` 
+          : undefined;
+
+        const { executeAiAgent } = await import('../workflow/engine.js');
+        await executeAiAgent({ configuration: {} }, conversationId, remoteJid, newIntent.agent_id, reminder);
+        return; // Workflow remains paused in WAITING_INPUT
+      }
+    }
+    
+    // 5. Normal Intent Execution (when no active workflow is waiting for input)
 
     // 4. Fetch the Workflow ID and Agent ID for this intent
     if (intentResult && intentResult.intent === 'api_error') {
