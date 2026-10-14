@@ -30,6 +30,13 @@ async function getVariables(conversationId: string): Promise<Record<string, any>
   return vars;
 }
 
+function interpolateVariables(template: string, vars: Record<string, any>): string {
+  if (!template) return template;
+  return template.replace(/\{\{\s*([a-zA-Z0-9_-]+)\s*\}\}/g, (_, key) => {
+    return vars[key] !== undefined && vars[key] !== null ? String(vars[key]) : `{{${key}}}`;
+  });
+}
+
 export class ConcurrentStateConflict extends Error {
   constructor(message: string) {
     super(message);
@@ -202,37 +209,49 @@ async function executeStep(
   const config = step.configuration || {};
 
   switch (step.step_type) {
-    case 'SEND_MESSAGE':
+    case 'SEND_MESSAGE': {
       if (isResuming) return { type: 'CONTINUE' }; // shouldn't happen, but just in case
-      await sendWhatsAppMessage(remoteJid, config.message || "Hello!", conversationId);
+      const vars = await getVariables(conversationId);
+      const rawText = config.message || config.text || "Hello!";
+      await sendWhatsAppMessage(remoteJid, interpolateVariables(rawText, vars), conversationId);
       return { type: 'CONTINUE' };
+    }
 
-    case 'ASK_QUESTION':
+    case 'ASK_QUESTION': {
       if (isResuming) {
-        // We asked the question, now we received the answer in userMessage.
-        // We can just continue.
+        // We asked the question, now save the user answer to variable if specified
+        const varName = config.variable || config.variable_name || config.field || config.field_name;
+        if (varName) {
+          await saveVariable(conversationId, varName, userMessage);
+        }
         return { type: 'CONTINUE' };
       }
-      await sendWhatsAppMessage(remoteJid, config.question || "Could you provide more details?", conversationId);
+      const vars = await getVariables(conversationId);
+      const rawText = config.question || config.prompt || "Could you provide more details?";
+      await sendWhatsAppMessage(remoteJid, interpolateVariables(rawText, vars), conversationId);
       return { 
         type: 'WAIT', 
         reason: 'USER_INPUT',
         timeoutDurationSeconds: config.timeout_seconds,
         timeoutAction: config.timeout_action
       };
+    }
 
-    case 'COLLECT_FIELD':
+    case 'COLLECT_FIELD': {
       if (isResuming) {
         const validation = validateField(userMessage, config.field_type || 'STRING', config);
         
         if (validation.valid) {
-          if (config.field) {
-            await saveVariable(conversationId, config.field, validation.normalizedValue);
+          const varName = config.field || config.field_name || config.variable || config.variable_name;
+          if (varName) {
+            await saveVariable(conversationId, varName, validation.normalizedValue);
           }
           return { type: 'CONTINUE' };
         } else {
           logger.info({ event: 'workflow_validation_failed', conversation_id: conversationId, step_id: step.id, input: userMessage, error: validation.error });
-          await sendWhatsAppMessage(remoteJid, config.retry_message || validation.error || "Please provide a valid input.", conversationId);
+          const vars = await getVariables(conversationId);
+          const rawRetry = config.retry_message || validation.error || "Please provide a valid input.";
+          await sendWhatsAppMessage(remoteJid, interpolateVariables(rawRetry, vars), conversationId);
           return { 
             type: 'WAIT', 
             reason: 'USER_INPUT',
@@ -242,13 +261,16 @@ async function executeStep(
         }
       }
       // Ask
-      await sendWhatsAppMessage(remoteJid, config.question || "Please enter the required information.", conversationId);
+      const vars = await getVariables(conversationId);
+      const rawPrompt = config.question || config.prompt || "Please enter the required information.";
+      await sendWhatsAppMessage(remoteJid, interpolateVariables(rawPrompt, vars), conversationId);
       return { 
         type: 'WAIT', 
         reason: 'USER_INPUT',
         timeoutDurationSeconds: config.timeout_seconds,
         timeoutAction: config.timeout_action 
       };
+    }
 
     case 'CONDITION':
       if (isResuming) return { type: 'CONTINUE' };
@@ -350,7 +372,7 @@ async function resolveNextStep(
   return allSteps.find(s => s.order_index > currentStep.order_index) || null;
 }
 
-async function executeAiAgent(step: any, conversationId: string, remoteJid: string, agentId?: string): Promise<WorkflowStepResult> {
+export async function executeAiAgent(step: any, conversationId: string, remoteJid: string, agentId?: string, appendSuffix?: string): Promise<WorkflowStepResult> {
   const allTools = configCache.getTable('tools').filter(t => t.is_enabled);
   const toolPermissions = configCache.getTable('tool_permissions');
   const toolParams = configCache.getTable('tool_parameters');
@@ -720,7 +742,8 @@ IMPORTANT INSTRUCTIONS:
       logger.warn({ event: 'human_takeover_prevented_ai_message' });
       throw new ConcurrentStateConflict('State conflict: conversation is no longer controlled by AI');
     }
-    await sendWhatsAppMessage(remoteJid, aiReply, conversationId);
+    const finalReply = appendSuffix ? `${aiReply}\n\n${appendSuffix}` : aiReply;
+    await sendWhatsAppMessage(remoteJid, finalReply, conversationId);
   } else {
     // Re-verify state for failure message
     const { data: finalCheck } = await supabase.from('conversations').select('state').eq('id', conversationId).single();

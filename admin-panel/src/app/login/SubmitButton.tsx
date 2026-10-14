@@ -11,14 +11,15 @@ export function SubmitButton() {
     <Button 
       type="submit" 
       disabled={pending}
-      className="w-full h-11  shadow-[0_0_15px_rgba(79,70,229,0.3)] transition-all font-medium text-sm mt-4"
+      className="w-full h-10 bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-sm transition-colors"
     >
       {pending ? (
         <>
           <Loading02Icon className="mr-2 h-4 w-4 animate-spin" />
           Signing in...
         </>
-      ) : ("Sign In to Dashboard"
+      ) : (
+        "Sign In to Dashboard"
       )}
     </Button>
   );

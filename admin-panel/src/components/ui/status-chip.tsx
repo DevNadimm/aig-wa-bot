@@ -2,7 +2,7 @@ import React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
-const statusChipVariants = cva(
+export const statusChipVariants = cva(
   "inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ring-1 ring-inset",
   {
     variants: {
@@ -31,10 +31,11 @@ export function StatusChip({ className, status, label, ...props }: StatusChipPro
   let computedStatus = status;
   if (!computedStatus && label) {
     const lowerLabel = label.toLowerCase();
-    if (["active", "published", "success", "completed"].includes(lowerLabel)) computedStatus = "success";
+    if (["active", "published", "success", "completed", "required"].includes(lowerLabel)) computedStatus = "success";
     else if (["pending", "warning"].includes(lowerLabel)) computedStatus = "warning";
     else if (["error", "cancelled", "failed"].includes(lowerLabel)) computedStatus = "error";
     else if (["info", "draft"].includes(lowerLabel)) computedStatus = "info";
+    else if (["optional", "disabled", "inactive"].includes(lowerLabel)) computedStatus = "neutral";
     else computedStatus = "neutral";
   }
 

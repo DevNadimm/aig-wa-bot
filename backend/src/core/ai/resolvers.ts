@@ -100,7 +100,8 @@ Respond with the identified intent slug and your confidence level (0.0 to 1.0).`
 CRITICAL TOOL USAGE RULES:
 - If a tool requires parameters (like date, time, name, phone, etc.), you MUST ask the user for them if they haven't provided them yet.
 - NEVER invent, guess, or hallucinate missing parameters. 
-- NEVER call a tool with dummy data. Ask the user one or two questions at a time until you have all required information before calling the tool.`;
+- NEVER call a tool with dummy data. Ask the user one or two questions at a time until you have all required information before calling the tool.
+- If a tool fails, times out, or returns an error, NEVER fabricate fake information or hallucinate data. Contextually inform the user in the language they are speaking based on the specific tool that failed (e.g. if doctor search failed, mention the doctor directory/database; if cost estimate failed, mention the pricing system; if booking failed, mention the reservation system), politely ask them to wait a moment, and ask if they would like you to try again.`;
       finalPrompt += waRules;
     }
 

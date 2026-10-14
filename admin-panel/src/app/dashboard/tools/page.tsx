@@ -1,4 +1,5 @@
 import { TypeChip } from "@/components/ui/type-chip";
+import { StatusChip } from "@/components/ui/status-chip";
 import { EmptyState } from "@/components/ui/empty-state";
 import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -62,13 +63,7 @@ export default async function ToolsPage() {
                       {tool.description}
                     </TableCell>
                     <TableCell>
-                      <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
-                        tool.is_enabled 
-                           ? 'bg-emerald-500/10 text-emerald-400 ring-1 ring-inset ring-emerald-500/20'
-                          : 'bg-zinc-800 text-zinc-400 ring-1 ring-inset ring-zinc-700'
-                      }`}>
-                        {tool.is_enabled ? 'Active' : 'Disabled'}
-                      </span>
+                      <StatusChip label={tool.is_enabled ? 'Active' : 'Disabled'} />
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1.5">

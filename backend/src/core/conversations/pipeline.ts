@@ -178,18 +178,77 @@ export async function processIncomingMessage(
       // Continue to normal AI processing if handoff detection fails
     }
 
-    // 2.5 Check if we need to resume a workflow
+    // 2.5 Check if we need to resume a workflow (with intelligent interruption & digression handling)
     if (conv.state === 'WAITING_INPUT' && conv.current_workflow_id && conv.current_step_id) {
-      logger.info(`Resuming workflow ${conv.current_workflow_id} at step ${conv.current_step_id}`);
+      const { classifyWorkflowInput } = await import('../workflow/interruption.js');
       
+      const workflow = configCache.getRecord('workflows', conv.current_workflow_id);
+      const pendingStep = configCache.getRecord('workflow_steps', conv.current_step_id);
+      const pendingQuestion = pendingStep?.configuration?.question || 
+                              pendingStep?.configuration?.prompt || 
+                              "Please provide the requested information.";
+
       let agentId: string | undefined = undefined;
       if (conv.current_intent_id) {
         const intent = configCache.getRecord('intents', conv.current_intent_id);
         if (intent) agentId = intent.agent_id;
       }
-      
-      await executeWorkflow(conv.current_workflow_id, conversationId, remoteJid, text, agentId, conv.current_step_id, true);
-      return;
+      if (!agentId) {
+        const defaultAgent = configCache.getTable('ai_agents').find(a => a.status === 'ACTIVE');
+        if (defaultAgent) agentId = defaultAgent.id;
+      }
+
+      const classification = await classifyWorkflowInput(
+        text,
+        pendingQuestion,
+        workflow?.name || 'Assistance'
+      );
+
+      if (classification.type === 'ANSWER') {
+        logger.info(`Input classified as ANSWER for workflow ${conv.current_workflow_id} at step ${conv.current_step_id}. Resuming.`);
+        await executeWorkflow(conv.current_workflow_id, conversationId, remoteJid, text, agentId, conv.current_step_id, true);
+        return;
+      }
+
+      if (classification.type === 'CANCEL_OR_SWITCH') {
+        logger.info(`Input classified as CANCEL_OR_SWITCH during workflow ${conv.current_workflow_id}. Resetting active workflow.`);
+        
+        await supabase.from('conversations').update({
+          current_workflow_id: null,
+          current_step_id: null,
+          current_intent_id: null,
+          state: 'AI_ACTIVE'
+        }).eq('id', conversationId);
+
+        const isSimpleCancel = [
+          'cancel', 'stop', 'reset', '/cancel', '/reset', 'abort', 
+          'nevermind', 'never mind', 'exit', 'quit',
+          'বাতিল', 'বন্ধ কর', 'থামুন', 'ক্যানসেল'
+        ].includes(text.trim().toLowerCase());
+
+        if (isSimpleCancel) {
+          const { sendWhatsAppMessage } = await import('../whatsapp/sender.js');
+          await sendWhatsAppMessage(
+            remoteJid,
+            "আপনার বর্তমান অনুরোধটি বাতিল করা হয়েছে। আমি আপনাকে অন্য কীভাবে সাহায্য করতে পারি? (Your request has been cancelled. How else may I assist you?)",
+            conversationId
+          );
+          return;
+        }
+
+        // If the user requested another intent (e.g. "I want doctor appointment"),
+        // allow pipeline to fall through naturally to Intent Routing below.
+      }
+
+      if (classification.type === 'DIGRESSION_QUESTION') {
+        logger.info(`Input classified as DIGRESSION_QUESTION ("${text}"). Answering user query while keeping workflow paused.`);
+        
+        const continuationSuffix = `📌 *আপনার ${workflow?.name || 'অনুরোধ'}টি সম্পন্ন করতে:*\n_${pendingQuestion}_`;
+        
+        const { executeAiAgent } = await import('../workflow/engine.js');
+        await executeAiAgent({ configuration: {} }, conversationId, remoteJid, agentId, continuationSuffix);
+        return; // Workflow remains paused in WAITING_INPUT
+      }
     }
 
     // 3. Intent Routing
@@ -222,21 +281,41 @@ export async function processIncomingMessage(
         .eq('organization_id', organizationId)
         .single();
 
-      if (intentData && intentData.workflow_id && conversationId) {
-        // Update conversation with intent and workflow
-        await supabase.from('conversations').update({
-          current_intent_id: intentData.id,
-          current_workflow_id: intentData.workflow_id
-        }).eq('id', conversationId);
+      if (intentData && conversationId) {
+        if (intentData.workflow_id) {
+          // Update conversation with intent and workflow
+          await supabase.from('conversations').update({
+            current_intent_id: intentData.id,
+            current_workflow_id: intentData.workflow_id
+          }).eq('id', conversationId);
 
-        // 5. Execute Workflow
-        await executeWorkflow(intentData.workflow_id, conversationId, remoteJid, text, intentData.agent_id);
-        return;
+          // 5. Execute Workflow
+          await executeWorkflow(intentData.workflow_id, conversationId, remoteJid, text, intentData.agent_id);
+          return;
+        } else if (intentData.agent_id) {
+          // Update conversation with intent and clear workflow
+          await supabase.from('conversations').update({
+            current_intent_id: intentData.id,
+            current_workflow_id: null
+          }).eq('id', conversationId);
+
+          // 5. Execute AI Agent directly!
+          const { executeAiAgent } = await import('../workflow/engine.js');
+          await executeAiAgent({ configuration: {} }, conversationId, remoteJid, intentData.agent_id);
+          return;
+        }
       }
     }
 
-    // Fallback: If no workflow is mapped, send a default response
+    // Fallback: If no workflow or agent is mapped for intent, or message is fallback, try default AI Assistant
     if (intentResult?.intent !== 'api_error') {
+      const defaultAgent = configCache.getTable('ai_agents').find(a => a.status === 'ACTIVE');
+      if (defaultAgent && conversationId) {
+        logger.info(`Routing unmapped/fallback message to default AI Agent: ${defaultAgent.name}`);
+        const { executeAiAgent } = await import('../workflow/engine.js');
+        await executeAiAgent({ configuration: {} }, conversationId, remoteJid, defaultAgent.id);
+        return;
+      }
       await executeFallback(remoteJid, conversationId);
     }
   } finally {

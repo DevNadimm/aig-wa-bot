@@ -27,6 +27,8 @@ import {
 } from "@/components/ui/table";
 import { updateTool, deleteTool } from "../actions";
 import { createClient } from "@/lib/supabase/client";
+import { statusChipVariants } from "@/components/ui/status-chip";
+import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
 interface ToolParam {
@@ -437,11 +439,11 @@ export default function ConfigureToolPage() {
           <Table withBorder={true}>
             <TableHeader>
               <TableRow className="border-zinc-800/50 hover:bg-transparent">
-                <TableHead className="text-zinc-400 font-medium text-xs w-[200px]">Parameter Name</TableHead>
-                <TableHead className="text-zinc-400 font-medium text-xs w-[130px]">Type</TableHead>
-                <TableHead className="text-zinc-400 font-medium text-xs w-[100px] text-center">Required</TableHead>
-                <TableHead className="text-zinc-400 font-medium text-xs">Description for AI Agent</TableHead>
-                <TableHead className="text-right text-zinc-400 font-medium text-xs w-[60px]">Action</TableHead>
+                <TableHead className="text-zinc-400 w-[200px]">Parameter Name</TableHead>
+                <TableHead className="text-zinc-400 w-[130px]">Type</TableHead>
+                <TableHead className="text-zinc-400 w-[100px] text-center">Required</TableHead>
+                <TableHead className="text-zinc-400">Description for AI Agent</TableHead>
+                <TableHead className="text-right text-zinc-400 w-[60px]">Action</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -485,11 +487,14 @@ export default function ConfigureToolPage() {
                       <button
                         type="button"
                         onClick={() => updateParam(index, "is_required", !param.is_required)}
-                        className={`px-2.5 py-1 rounded text-[11px] font-medium border transition-colors ${
+                        className={cn(
+                          statusChipVariants({ status: param.is_required ? "success" : "neutral" }),
+                          "cursor-pointer select-none transition-colors",
                           param.is_required
-                            ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20"
-                            : "bg-zinc-800/60 text-zinc-500 border-zinc-700/60 hover:text-zinc-400"
-                        }`}
+                            ? "hover:bg-emerald-500/20 hover:ring-emerald-500/30"
+                            : "hover:bg-zinc-500/20 hover:text-zinc-300 hover:ring-zinc-500/30"
+                        )}
+                        title="Click to toggle Required / Optional"
                       >
                         {param.is_required ? "Required" : "Optional"}
                       </button>

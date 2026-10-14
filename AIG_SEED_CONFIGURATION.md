@@ -165,33 +165,52 @@ Configure these in **Dashboard > Workflows > Create Workflow**:
 
 Configure these in **Dashboard > Tools & APIs > Create Tool**:
 
-> **Note:** Real-time, fluctuating data such as live doctor rosters, changing OPD days, and exact package cost estimates are delegated to APIs rather than static text.
+> **Note:** Real-time, fluctuating data such as live doctor rosters, changing OPD days, slot availability, and exact package cost estimates are delegated to APIs rather than static text. All tools connect to the backend API at `https://simple-backend-znk7.onrender.com`.
 
 ### Tool 1: `search_doctors`
 * **Name:** `search_doctors`
 * **Tool Type:** `REST_API`
-* **Description:** `Queries the live AIG Hospital physician directory by specialty, department, or doctor name. Returns active consultants, qualifications, OPD days, and chamber timings.`
+* **HTTP Method:** `POST`
+* **Endpoint URL:** `https://simple-backend-znk7.onrender.com/api/doctors/search`
+* **Description:** `Find doctors based on department or symptom.`
 * **Input Parameters:**
-  - `department` (string, optional): e.g. "Gastroenterology", "Hepatology"
-  - `doctor_name` (string, optional): e.g. "Dr. Nageshwar Reddy"
+  - `department` (string, optional): The department name e.g. Cardiology
+  - `symptom` (string, optional): The symptom the patient is experiencing
 * **Status:** Enabled
 
-### Tool 2: `get_cost_estimate`
-* **Name:** `get_cost_estimate`
+### Tool 2: `check_availability`
+* **Name:** `check_availability`
 * **Tool Type:** `REST_API`
-* **Description:** `Retrieves real-time official cost estimates for outpatient investigations, procedures (Endoscopy, Colonoscopy, ERCP, FibroScan), surgeries, and room packages.`
+* **HTTP Method:** `POST`
+* **Endpoint URL:** `https://simple-backend-znk7.onrender.com/api/appointments/availability`
+* **Description:** `Check if a specific doctor has available slots on a given date.`
 * **Input Parameters:**
-  - `procedure_name` (string): e.g. "Endoscopy", "Colonoscopy", "OPD Consultation"
+  - `doctor_id` (string, required): The doctor's ID retrieved from the list returned by the `search_doctors` API call.
+  - `date` (string, required): The date in YYYY-MM-DD format
 * **Status:** Enabled
 
 ### Tool 3: `book_appointment`
 * **Name:** `book_appointment`
 * **Tool Type:** `REST_API`
-* **Description:** `Submits verified patient appointment intake details directly to the hospital scheduling gateway.`
+* **HTTP Method:** `POST`
+* **Endpoint URL:** `https://simple-backend-znk7.onrender.com/api/appointments/book`
+* **Description:** `Book a confirmed appointment for a patient.`
 * **Input Parameters:**
-  - `patient_name` (string)
-  - `doctor_id` (string)
-  - `preferred_date` (string)
+  - `doctor_id` (string, required): The exact ID of the doctor selected by the user. DO NOT GUESS.
+  - `date` (string, required): The appointment date (YYYY-MM-DD). YOU MUST ASK THE USER FOR THIS. NEVER GUESS OR USE CURRENT DATE.
+  - `time_slot` (string, required): The time slot. YOU MUST ASK THE USER FOR THIS. NEVER GUESS.
+  - `patient_name` (string, required): The full name of the patient. YOU MUST ASK THE USER FOR THIS.
+  - `patient_phone` (string, required): The phone number of the patient. YOU MUST ASK THE USER FOR THIS.
+* **Status:** Enabled
+
+### Tool 4: `get_cost_estimate`
+* **Name:** `get_cost_estimate`
+* **Tool Type:** `REST_API`
+* **HTTP Method:** `POST`
+* **Endpoint URL:** `https://simple-backend-znk7.onrender.com/api/cost/estimate`
+* **Description:** `Get the cost estimate for a specific treatment or medical test.`
+* **Input Parameters:**
+  - `treatment_name` (string, required): Name of the treatment or test
 * **Status:** Enabled
 
 ---

@@ -137,6 +137,7 @@ export async function executeExternalApi(url: string, method: string, headers: a
 
   } catch (error: any) {
     logger.error({ err: error, url }, `API execution failed`);
+
     if (error instanceof ToolError) {
       return { error: error.message, errorType: error.type };
     }
